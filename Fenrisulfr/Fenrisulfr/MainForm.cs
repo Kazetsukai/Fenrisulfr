@@ -23,6 +23,8 @@ namespace Fenrisulfr
 
             chart.Series[0].Color = Color.Red;
             chart.Series[1].Color = Color.Green;
+
+          
         }               
        
         private void b_Start_Click(object sender, EventArgs e)
@@ -50,6 +52,13 @@ namespace Fenrisulfr
 
                 chart.Series[0].Points.Add(new DataPoint(sampleCount, result.Read770));
                 chart.Series[1].Points.Add(new DataPoint(sampleCount, result.Read850));
+
+                int chartWidth = 1000;
+                chart.ChartAreas[0].AxisX.Minimum = sampleCount - chartWidth;
+                chart.ChartAreas[0].AxisX.Maximum = sampleCount;
+
+                chart.ChartAreas[1].AxisX.Minimum = sampleCount - chartWidth;
+                chart.ChartAreas[1].AxisX.Maximum = sampleCount;
             }              
         }
 
