@@ -1,0 +1,57 @@
+					---------Serial protocol for FNIRS device---------
+
+-----Turn on/off specific LED:-----
+
+<'L'><LED_STATE:BYTEH ADDRx><BYTEL ADDRx>
+
+Details:
+	<'L'> is hex 0x4C.	
+	:BYTEH ADDR><BYTEL ADDR> are the upper and lower address bytes of the LED (16 bit address). The first bit of :BYTEH ADDR> contains the LED state.
+	<LED_STATE: is highest bit of first byte after, can be 0 or 1 (turn off LED and turn on LED respectively).
+
+Device will send acknowledgement after completing the LED state change by returning the command 'L' (0x4C) to the PC.
+
+Example:
+	To turn on LED at address 3, the following command is sent to the device:
+	4C 00 03 01
+
+	To turn off LED at address 2, the following command is sent to the device:
+	4C 00 02 00 
+
+
+
+-----Get sensor reading:-----
+
+<'S'><BYTEH ADDR><BYTEL ADDR>
+
+Details:
+	<'S'> is hex 0x53.
+	<BYTEH ADDR><BYTEL ADDR> are the upper and lower address bytes of the sensor to be read (16 bit address).	
+
+Example:
+	To get sensor reading from sensor number 24, the following command is sent to the device:
+	53 00 18		(note 24 is hex 0x0018)
+	
+	Device will respond by taking a reading from sensor, and will then send to PC:
+	<'S'><BYTEH DATA><BYTEL DATA>
+	e.g, 53 02 8C
+
+-----Set ADC Config:-----
+
+<'A'><VREF:PRESCALER>
+
+Details:
+	<'A'> is hex 0x41.
+	<VREF: Upper 4 bits of <VREF:PRESCALER> byte. Can be 0x00 or 0x01. If 0x00, then ADC ref voltage is set to 1.1V. If 0x01, then ADC ref voltage is set to 5.0V. 
+	       Setting to 1.1V will give better accuracy for small signals, but will clip when the signal gets too high. (think of it like a zoom in/out kind of thing).
+	
+	:PRESCALER> Lower 4 bits of <VREF:PRESCALER> byte. Sets division factor between system clock frequency and input clock to the ADC. Must be a value 'n' such that 1 < n < 7. (prescaler factor is then 2^n)	    		    Larger values mean ADC takes longer to get reading, but this may help reduce noise.
+
+Example:
+	To set ADC to use vref 5V and prescaler number 6 (64 factor), computer sends:
+	41 86
+
+	Device will respond by sending <'A'> back to computer.
+	
+	
+
