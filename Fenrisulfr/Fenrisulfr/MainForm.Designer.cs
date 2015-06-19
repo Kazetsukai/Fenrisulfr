@@ -41,6 +41,9 @@
             this.t_sampleRate = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.chart = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.lblSamples = new System.Windows.Forms.Label();
+            this.btnSaveTrace = new System.Windows.Forms.Button();
+            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.chart)).BeginInit();
             this.SuspendLayout();
             // 
@@ -55,6 +58,7 @@
             // 
             // sampleTimer
             // 
+            this.sampleTimer.Enabled = true;
             this.sampleTimer.Interval = 20;
             this.sampleTimer.Tick += new System.EventHandler(this.sampleTimer_Tick);
             // 
@@ -136,11 +140,38 @@
             this.chart.Text = "chart1";
             this.chart.Click += new System.EventHandler(this.chart_Click);
             // 
+            // lblSamples
+            // 
+            this.lblSamples.AutoSize = true;
+            this.lblSamples.Location = new System.Drawing.Point(510, 66);
+            this.lblSamples.Name = "lblSamples";
+            this.lblSamples.Size = new System.Drawing.Size(105, 13);
+            this.lblSamples.TabIndex = 10;
+            this.lblSamples.Text = "(Waiting for samples)";
+            // 
+            // btnSaveTrace
+            // 
+            this.btnSaveTrace.Enabled = false;
+            this.btnSaveTrace.Location = new System.Drawing.Point(513, 87);
+            this.btnSaveTrace.Name = "btnSaveTrace";
+            this.btnSaveTrace.Size = new System.Drawing.Size(102, 29);
+            this.btnSaveTrace.TabIndex = 11;
+            this.btnSaveTrace.Text = "Save Trace";
+            this.btnSaveTrace.UseVisualStyleBackColor = true;
+            this.btnSaveTrace.Click += new System.EventHandler(this.btnSaveTrace_Click);
+            // 
+            // saveFileDialog
+            // 
+            this.saveFileDialog.DefaultExt = "csv";
+            this.saveFileDialog.Filter = "CSV file|*.csv";
+            // 
             // FNIRS
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(987, 556);
+            this.Controls.Add(this.btnSaveTrace);
+            this.Controls.Add(this.lblSamples);
             this.Controls.Add(this.chart);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.t_sampleRate);
@@ -168,6 +199,9 @@
         private System.Windows.Forms.TextBox t_sampleRate;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart;
+        private System.Windows.Forms.Label lblSamples;
+        private System.Windows.Forms.Button btnSaveTrace;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog;
     }
 }
 

@@ -23,6 +23,7 @@ namespace Fenrisulfr
         private ConcurrentQueue<SensorResult> _results = new ConcurrentQueue<SensorResult>();
         private Task _readerThread;
         private Stopwatch _stopwatch = new Stopwatch();
+        private bool _stopping = false;
 
 
         public FnirsController()
@@ -31,13 +32,15 @@ namespace Fenrisulfr
 
         public void Start()
         {
+            _results = new ConcurrentQueue<SensorResult>();
+
             if (_readerThread == null)
             {
                 _readerThread = Task.Run(() =>
                 {
                     _stopwatch.Start();
 
-                    while (true)
+                    while (!_stopping)
                     {
                         try
                         {
@@ -63,6 +66,16 @@ namespace Fenrisulfr
             {
                 Console.WriteLine("Already started!");
             }
+        }
+
+        public void Stop()
+        {
+            _stopping = true;
+            
+            _readerThread.Wait();
+
+            _stopping = false;
+            _readerThread = null;
         }
 
         public int ResultsInQueue { get { return _results.Count; } }
