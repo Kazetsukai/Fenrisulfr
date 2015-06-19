@@ -151,6 +151,7 @@
             this.MinimumSize = new System.Drawing.Size(400, 400);
             this.Name = "FNIRS";
             this.Text = "Fenrisulfr";
+            this.Load += new System.EventHandler(this.FNIRS_Load);
             ((System.ComponentModel.ISupportInitialize)(this.chart)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

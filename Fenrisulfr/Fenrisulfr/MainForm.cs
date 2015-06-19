@@ -48,12 +48,17 @@ namespace Fenrisulfr
                 sampleCount++;
                 var result = _controller.GetNextResult();
 
-                chart.Series[0].Points.Add(new DataPoint(sampleCount, result.Read770));
-                chart.Series[1].Points.Add(new DataPoint(sampleCount, result.Read850));
+                chart.Series[0].Points.Add(new DataPoint(result.Milliseconds, result.Read770));
+                chart.Series[1].Points.Add(new DataPoint(result.Milliseconds, result.Read850));
             }              
         }
 
         private void chart_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void FNIRS_Load(object sender, EventArgs e)
         {
 
         }

@@ -4,5 +4,6 @@ namespace Fenrisulfr
     {
         public int Read770;
         public int Read850;
+        public long Milliseconds;
     }
 }

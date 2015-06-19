@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Linq.Expressions;
@@ -21,6 +22,8 @@ namespace Fenrisulfr
         private SerialPort _serialPort = new SerialPort(Port, 2000000, Parity.Even, 8, StopBits.One);
         private ConcurrentQueue<SensorResult> _results = new ConcurrentQueue<SensorResult>();
         private Task _readerThread;
+        private Stopwatch _stopwatch = new Stopwatch();
+
 
         public FnirsController()
         {           
@@ -32,6 +35,8 @@ namespace Fenrisulfr
             {
                 _readerThread = Task.Run(() =>
                 {
+                    _stopwatch.Start();
+
                     while (true)
                     {
                         try
@@ -85,7 +90,7 @@ namespace Fenrisulfr
         }
 
         void DoWork()
-        {           
+        {
             //Flash leds and get data
             SetLEDState(1, LEDState.On);
             int sensorValue770 = RequestSensorValue(1);
@@ -95,7 +100,7 @@ namespace Fenrisulfr
             int sensorValue850 = RequestSensorValue(1);
             SetLEDState(2, LEDState.Off);
 
-            _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read850 = sensorValue850 });
+            _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read850 = sensorValue850, Milliseconds = _stopwatch.ElapsedMilliseconds });
         }
 
         int RequestSensorValue(ushort address)
