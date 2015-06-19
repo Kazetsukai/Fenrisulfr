@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,19 +28,45 @@ namespace Fenrisulfr
             chart.Series[0].Color = Color.Red;
             chart.Series[1].Color = Color.Green;
 
-          
-        }               
-       
-        private void b_Start_Click(object sender, EventArgs e)
+            //Populate comport select combo box
+            string[] availablePorts = SerialPort.GetPortNames();
+
+            foreach (string port in availablePorts)
+            {
+                Console.WriteLine(port);
+                c_comportSelect.Items.Add(port);
+            }
+
+            //Try set starting comport from last used comport
+            if (c_comportSelect.Items.Contains(Properties.Settings.Default.DeviceCOMPort))
+            {
+                c_comportSelect.SelectedItem = Properties.Settings.Default.DeviceCOMPort;
+            }
+            else
+            {
+                c_comportSelect.SelectedIndex = 0;
+            }         
+        }    
+
+        private void b_StartStop_Click(object sender, EventArgs e)
         {
-            _traceStart = DateTime.Now;
-            _controller.Start();
+            if (_controller.GetState() == FnirsControllerState.Stopped)
+            {
+                _traceStart = DateTime.Now;
+                b_StartStop.Text = "Stop";
+                c_comportSelect.Enabled = false;
+                _controller.Start();
+                sampleTimer.Start();
+            }
+            else if (_controller.GetState() == FnirsControllerState.Running)
+            {
+                b_StartStop.Text = "Start";
+                c_comportSelect.Enabled = true;
+                sampleTimer.Stop();
+                _controller.Stop();
+            }
         }
 
-        private void b_Stop_Click(object sender, EventArgs e)
-        {
-            _controller.Stop();
-        }
 
         private void sampleTimer_Tick(object sender, EventArgs e)
         {
@@ -103,6 +130,13 @@ namespace Fenrisulfr
                         writer.WriteLine("{0},{1},{2}", result.Milliseconds, result.Read770, result.Read850);
                 }
             }
+        }
+
+        private void c_comportSelect_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //Save comport selection to appdata settings config file
+            Properties.Settings.Default.DeviceCOMPort = c_comportSelect.SelectedItem.ToString();
+            Properties.Settings.Default.Save();
         }
     }
 }

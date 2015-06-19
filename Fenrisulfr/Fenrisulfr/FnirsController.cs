@@ -17,14 +17,18 @@ namespace Fenrisulfr
         private readonly static byte[] RequestValueCommandPacket = { 0x53, 0x00, 0x00 };
         private readonly static byte[] SetLEDCommandPacket = { 0x4C, 0x00, 0x00 };
         private readonly static byte[] ReturnData = new byte[3];
-        private static readonly string Port = "COM5";
 
-        private SerialPort _serialPort = new SerialPort(Port, 2000000, Parity.Even, 8, StopBits.One);
+        private SerialPort _serialPort = new SerialPort(Properties.Settings.Default.DeviceCOMPort, 2000000, Parity.Even, 8, StopBits.One);
         private ConcurrentQueue<SensorResult> _results = new ConcurrentQueue<SensorResult>();
         private Task _readerThread;
         private Stopwatch _stopwatch = new Stopwatch();
         private bool _stopping = false;
+        private FnirsControllerState _state = FnirsControllerState.Stopped;
 
+        public FnirsControllerState GetState()
+        {
+            return _state;
+        }
 
         public FnirsController()
         {           
@@ -32,6 +36,7 @@ namespace Fenrisulfr
 
         public void Start()
         {
+            _state = FnirsControllerState.Running;
             _results = new ConcurrentQueue<SensorResult>();
 
             if (_readerThread == null)
@@ -46,7 +51,7 @@ namespace Fenrisulfr
                         {
                             if (!_serialPort.IsOpen)
                             {
-                                Console.WriteLine("Opening serial port: " + Port);
+                                Console.WriteLine("Opening serial port: " + Properties.Settings.Default.DeviceCOMPort);
                                 _serialPort.Open();
                             }
 
@@ -76,6 +81,10 @@ namespace Fenrisulfr
 
             _stopping = false;
             _readerThread = null;
+
+            Console.WriteLine("Closing serial port: " + Properties.Settings.Default.DeviceCOMPort);
+            _serialPort.Close();
+            _state = FnirsControllerState.Stopped;
         }
 
         public int ResultsInQueue { get { return _results.Count; } }

@@ -1,6 +1,6 @@
 namespace Fenrisulfr
 {
-    enum LEDState
+    public enum LEDState
     {
         On,
         Off

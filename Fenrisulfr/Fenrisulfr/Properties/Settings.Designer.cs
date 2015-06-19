@@ -22,5 +22,17 @@ namespace Fenrisulfr.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("COM#")]
+        public string DeviceCOMPort {
+            get {
+                return ((string)(this["DeviceCOMPort"]));
+            }
+            set {
+                this["DeviceCOMPort"] = value;
+            }
+        }
     }
 }
