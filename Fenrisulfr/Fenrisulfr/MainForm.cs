@@ -68,7 +68,7 @@ namespace Fenrisulfr
             // Only let people save if there are samples to save
             if (_trace.Count == 0)
             {
-                btnSaveTrace.Enabled = true;
+                btnSaveTrace.Enabled = false;
                 lblSamples.Text = "(Waiting for samples)";
             }
             else
