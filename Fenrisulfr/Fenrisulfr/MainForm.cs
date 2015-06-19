@@ -15,6 +15,7 @@ namespace Fenrisulfr
     public partial class FNIRS : Form
     {
         private FnirsController _controller = new FnirsController();
+        int sampleCount;
 
         public FNIRS()
         {
@@ -22,14 +23,7 @@ namespace Fenrisulfr
 
             chart.Series[0].Color = Color.Red;
             chart.Series[1].Color = Color.Green;
-
-        }
-
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            serialPort1.Close();
-        }      
+        }               
        
         private void b_Start_Click(object sender, EventArgs e)
         {
@@ -47,20 +41,16 @@ namespace Fenrisulfr
         {
             var numResults = _controller.ResultsInQueue;
 
-            Text = numResults.ToString();
+            Text = numResults.ToString();            
+                
+            while(_controller.ResultsInQueue > 0)
+            { 
+                sampleCount++;
+                var result = _controller.GetNextResult();
 
-            if (numResults > 100)
-            {
-                // Grab 100 results each tick becauise why not?
-                for (int i = 0; i < 100; i++)
-                {
-                    var result = _controller.GetNextResult();
-
-                    ////////////////////////////////////
-                    // Do what you want with results here? For now I am throwing them away
-                    ////////////////////////////////////
-                }
-            }
+                chart.Series[0].Points.Add(new DataPoint(sampleCount, result.Read770));
+                chart.Series[1].Points.Add(new DataPoint(sampleCount, result.Read850));
+            }              
         }
 
         private void chart_Click(object sender, EventArgs e)

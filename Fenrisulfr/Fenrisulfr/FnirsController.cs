@@ -14,16 +14,16 @@ namespace Fenrisulfr
     public class FnirsController
     {
         private readonly static byte[] RequestValueCommandPacket = { 0x53, 0x00, 0x00 };
-        private readonly static byte[] SetLEDCommandPacket = { 0x53, 0x00, 0x00 };
+        private readonly static byte[] SetLEDCommandPacket = { 0x4C, 0x00, 0x00 };
         private readonly static byte[] ReturnData = new byte[3];
         private static readonly string Port = "COM5";
 
-        private SerialPort _serialPort = new SerialPort(Port, 2000000, Parity.Even);
+        private SerialPort _serialPort = new SerialPort(Port, 2000000, Parity.Even, 8, StopBits.One);
         private ConcurrentQueue<SensorResult> _results = new ConcurrentQueue<SensorResult>();
         private Task _readerThread;
 
         public FnirsController()
-        {
+        {           
         }
 
         public void Start()
@@ -85,15 +85,15 @@ namespace Fenrisulfr
         }
 
         void DoWork()
-        {
+        {           
             //Flash leds and get data
             SetLEDState(1, LEDState.On);
             int sensorValue770 = RequestSensorValue(1);
             SetLEDState(1, LEDState.Off);
 
-            SetLEDState(1, LEDState.On);
+            SetLEDState(2, LEDState.On);
             int sensorValue850 = RequestSensorValue(1);
-            SetLEDState(1, LEDState.Off);
+            SetLEDState(2, LEDState.Off);
 
             _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read850 = sensorValue850 });
         }
@@ -122,6 +122,10 @@ namespace Fenrisulfr
             //Clear serial port in buffer
             _serialPort.DiscardInBuffer();
 
+            SetLEDCommandPacket[0] = 0x4C;
+            SetLEDCommandPacket[1] = 0;
+            SetLEDCommandPacket[2] = 0; 
+
             //Inject state data to packet
             if (state == LEDState.On)
             {
@@ -137,7 +141,7 @@ namespace Fenrisulfr
 
             //Get acknowledgement
             byte ack = (byte)_serialPort.ReadByte();
-
+            
             if (ack != 0x4C)
             {
                 throw new LEDStateChangeUnacknowledgedException("LED State change was requested by computer, but not acknowledged by device.");

@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.l_sensorValue_770 = new System.Windows.Forms.Label();
             this.sampleTimer = new System.Windows.Forms.Timer(this.components);
             this.b_Start = new System.Windows.Forms.Button();
@@ -41,7 +41,6 @@
             this.t_sampleRate = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.chart = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.chart)).BeginInit();
             this.SuspendLayout();
             // 
@@ -56,6 +55,7 @@
             // 
             // sampleTimer
             // 
+            this.sampleTimer.Interval = 20;
             this.sampleTimer.Tick += new System.EventHandler(this.sampleTimer_Tick);
             // 
             // b_Start
@@ -110,37 +110,31 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chart.BackColor = System.Drawing.Color.Transparent;
-            chartArea5.AxisX.Minimum = 0D;
-            chartArea5.AxisY.Maximum = 300D;
-            chartArea5.AxisY.Minimum = 0D;
-            chartArea5.BackColor = System.Drawing.Color.Transparent;
-            chartArea5.Name = "ChartArea1";
-            chartArea6.BackColor = System.Drawing.Color.Transparent;
-            chartArea6.Name = "ChartArea2";
-            this.chart.ChartAreas.Add(chartArea5);
-            this.chart.ChartAreas.Add(chartArea6);
+            chartArea1.AxisX.Minimum = 0D;
+            chartArea1.AxisY.Maximum = 300D;
+            chartArea1.AxisY.Minimum = 0D;
+            chartArea1.BackColor = System.Drawing.Color.Transparent;
+            chartArea1.Name = "ChartArea1";
+            chartArea2.BackColor = System.Drawing.Color.Transparent;
+            chartArea2.Name = "ChartArea2";
+            this.chart.ChartAreas.Add(chartArea1);
+            this.chart.ChartAreas.Add(chartArea2);
             this.chart.Location = new System.Drawing.Point(18, 137);
             this.chart.Name = "chart";
-            series5.ChartArea = "ChartArea1";
-            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series5.MarkerSize = 10;
-            series5.Name = "Series1";
-            series6.ChartArea = "ChartArea2";
-            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series6.MarkerSize = 10;
-            series6.Name = "Series2";
-            this.chart.Series.Add(series5);
-            this.chart.Series.Add(series6);
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.MarkerSize = 10;
+            series1.Name = "Series1";
+            series2.ChartArea = "ChartArea2";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.MarkerSize = 10;
+            series2.Name = "Series2";
+            this.chart.Series.Add(series1);
+            this.chart.Series.Add(series2);
             this.chart.Size = new System.Drawing.Size(957, 407);
             this.chart.TabIndex = 9;
             this.chart.Text = "chart1";
             this.chart.Click += new System.EventHandler(this.chart_Click);
-            // 
-            // serialPort1
-            // 
-            this.serialPort1.BaudRate = 2000000;
-            this.serialPort1.Parity = System.IO.Ports.Parity.Even;
-            this.serialPort1.PortName = "COM5";
             // 
             // FNIRS
             // 
@@ -157,7 +151,6 @@
             this.MinimumSize = new System.Drawing.Size(400, 400);
             this.Name = "FNIRS";
             this.Text = "Fenrisulfr";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.chart)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -174,7 +167,6 @@
         private System.Windows.Forms.TextBox t_sampleRate;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart;
-        private System.IO.Ports.SerialPort serialPort1;
     }
 }
 
