@@ -25,8 +25,16 @@ namespace Fenrisulfr
         private bool _stopping = false;
         private FnirsControllerState _state = FnirsControllerState.Stopped;
 
+        private int _samplePeriod_ms = 100;
+
         int sensorValue770;
         int sensorValue850;
+
+        public void SetSampleRate(double SampleRateHz)
+        {
+            _samplePeriod_ms = (int)(1000 / SampleRateHz);
+            Console.WriteLine("Sample period set to " + _samplePeriod_ms.ToString() + " ms. (Sample rate = " + SampleRateHz.ToString() + " Hz)");
+        }
 
         public FnirsControllerState GetState()
         {
@@ -65,6 +73,7 @@ namespace Fenrisulfr
                             while (true)
                             {
                                 DoWork();
+                                Thread.Sleep(_samplePeriod_ms);
                             }
                         }
                         catch (Exception ex)

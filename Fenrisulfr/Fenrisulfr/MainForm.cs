@@ -29,15 +29,20 @@ namespace Fenrisulfr
 
             //Load user settings
             this.Size = Properties.Settings.Default.WindowSize;
-            chart.ChartAreas[0].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY770nm, Properties.Settings.Default.ChartScaleViewMaxY770nm);
-            chart.ChartAreas[1].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY850nm, Properties.Settings.Default.ChartScaleViewMaxY850nm);
+            t_sampleRate.Text = Properties.Settings.Default.SampleRate.ToString();
+            chart.ChartAreas["ChartArea_770"].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY770nm, Properties.Settings.Default.ChartScaleViewMaxY770nm);
+            chart.ChartAreas["ChartArea_850"].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY850nm, Properties.Settings.Default.ChartScaleViewMaxY850nm);
       
             //Initialize chart
-            chart.Series[0].Color = Color.Red;
-            chart.Series[1].Color = Color.Green;
-            chart.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
-            chart.ChartAreas[1].AxisX.ScaleView.Zoomable = true;
-                     
+            chart.Series["S1_770_Raw"].Color = Color.DarkGreen;
+            chart.Series["S1_770_MovAvg"].Color = Color.Green;
+            chart.Series["S1_770_MovAvg"].BorderWidth = 2;
+            chart.Series["S1_850_Raw"].Color = Color.DarkRed;
+            chart.Series["S1_850_MovAvg"].Color = Color.Red;
+
+            chart.ChartAreas["ChartArea_770"].AxisX.ScaleView.Zoomable = true;
+            chart.ChartAreas["ChartArea_850"].AxisX.ScaleView.Zoomable = true;
+            
             //Populate comport select combo box
             string[] availablePorts = SerialPort.GetPortNames();
 
@@ -62,22 +67,45 @@ namespace Fenrisulfr
         {          
             if (_controller.GetState() == FnirsControllerState.Stopped)
             {
+                //Check sample rate is valid
+                double sampleRate;
+
+                try
+                {
+                    double.TryParse(t_sampleRate.Text, out sampleRate);
+                    if (sampleRate <= 0)
+                    {
+                        MessageBox.Show("Invalid sample rate. Must be a number greater than zero Hz.");
+                        return;
+                    }
+
+                }
+                catch
+                {
+                    MessageBox.Show("Invalid sample rate. Must be a number greater than zero Hz.");
+                    return;
+                }          
+
                 _traceStart = DateTime.Now;
                 b_StartStop.Text = "Stop";
                 c_comportSelect.Enabled = false;
+                t_sampleRate.Enabled = false;
+
+                _controller.SetSampleRate(sampleRate);
                 _controller.Start();
-                sampleTimer.Start();
+                UI_UpdateTimer.Start();
             }
             else if (_controller.GetState() == FnirsControllerState.Running)
             {
                 b_StartStop.Text = "Start";
                 c_comportSelect.Enabled = true;
+                t_sampleRate.Enabled = true;
                 _controller.Stop();
-                sampleTimer.Stop();                
+                UI_UpdateTimer.Stop();                
             }
         }
         
-        private void sampleTimer_Tick(object sender, EventArgs e)
+        private void UI_UpdateTimer_Tick(object sender, EventArgs e)
         {
             var numResults = _controller.ResultsInQueue;
 
@@ -88,17 +116,21 @@ namespace Fenrisulfr
                 var result = _controller.GetNextResult();
                 _trace.Add(result);
 
-                chart.Series[0].Points.Add(new DataPoint(result.Milliseconds, result.Read770));
-                chart.Series[1].Points.Add(new DataPoint(result.Milliseconds, result.Read850));
-                                
-                chart.ChartAreas[0].AxisX.Minimum = result.Milliseconds - chartWidth;
-                chart.ChartAreas[0].AxisX.Maximum = result.Milliseconds;
+                chart.Series["S1_770_Raw"].Points.Add(new DataPoint(result.Milliseconds, result.Read770));
+                chart.Series["S1_850_Raw"].Points.Add(new DataPoint(result.Milliseconds, result.Read850));
+                
+                if (chart.Series["S1_850_Raw"].Points.Count > 100)
+                {
+                    chart.DataManipulator.FinancialFormula(FinancialFormula.MovingAverage, chart.Series["S1_770_Raw"], chart.Series["S1_770_MovAvg"]);
+                }
 
-                chart.ChartAreas[1].AxisX.Minimum = result.Milliseconds - chartWidth;
-                chart.ChartAreas[1].AxisX.Maximum = result.Milliseconds;
+                chart.ChartAreas["ChartArea_770"].AxisX.Minimum = result.Milliseconds - chartWidth;
+                chart.ChartAreas["ChartArea_770"].AxisX.Maximum = result.Milliseconds;
+
+                chart.ChartAreas["ChartArea_850"].AxisX.Minimum = result.Milliseconds - chartWidth;
+                chart.ChartAreas["ChartArea_850"].AxisX.Maximum = result.Milliseconds;
             }         
      
-
             // Only let people save if there are samples to save
             if (_trace.Count == 0)
             {
@@ -154,12 +186,29 @@ namespace Fenrisulfr
 
         private void chart_AxisViewChanged(object sender, ViewEventArgs e)
         {
-            Properties.Settings.Default.ChartScaleViewMaxY770nm = chart.ChartAreas[0].AxisY.ScaleView.ViewMaximum;
-            Properties.Settings.Default.ChartScaleViewMaxY850nm = chart.ChartAreas[1].AxisY.ScaleView.ViewMaximum;
-            Properties.Settings.Default.ChartScaleViewMinY770nm = chart.ChartAreas[0].AxisY.ScaleView.ViewMinimum;
-            Properties.Settings.Default.ChartScaleViewMinY850nm = chart.ChartAreas[1].AxisY.ScaleView.ViewMinimum;
+            Properties.Settings.Default.ChartScaleViewMaxY770nm = chart.ChartAreas["ChartArea_770"].AxisY.ScaleView.ViewMaximum;
+            Properties.Settings.Default.ChartScaleViewMaxY850nm = chart.ChartAreas["ChartArea_850"].AxisY.ScaleView.ViewMaximum;
+            Properties.Settings.Default.ChartScaleViewMinY770nm = chart.ChartAreas["ChartArea_770"].AxisY.ScaleView.ViewMinimum;
+            Properties.Settings.Default.ChartScaleViewMinY850nm = chart.ChartAreas["ChartArea_850"].AxisY.ScaleView.ViewMinimum;
 
             Properties.Settings.Default.Save(); 
+        }
+
+        private void t_sampleRate_TextChanged(object sender, EventArgs e)
+        {
+            double sampleRate;
+
+            try
+            {
+                double.TryParse(t_sampleRate.Text, out sampleRate);
+                Properties.Settings.Default.SampleRate = sampleRate;
+                Properties.Settings.Default.Save();
+              
+            }
+            catch
+            {
+                t_sampleRate.Text = Properties.Settings.Default.SampleRate.ToString();
+            }
         }
     }
 }

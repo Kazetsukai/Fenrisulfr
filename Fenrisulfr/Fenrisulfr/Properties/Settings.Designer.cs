@@ -94,5 +94,17 @@ namespace Fenrisulfr.Properties {
                 this["ChartScaleViewMinY850nm"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public double SampleRate {
+            get {
+                return ((double)(this["SampleRate"]));
+            }
+            set {
+                this["SampleRate"] = value;
+            }
+        }
     }
 }
