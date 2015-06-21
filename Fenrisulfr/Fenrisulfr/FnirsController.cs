@@ -25,13 +25,16 @@ namespace Fenrisulfr
         private bool _stopping = false;
         private FnirsControllerState _state = FnirsControllerState.Stopped;
 
+        int sensorValue770;
+        int sensorValue850;
+
         public FnirsControllerState GetState()
         {
             return _state;
         }
 
         public FnirsController()
-        {           
+        {
         }
 
         public void Start()
@@ -53,6 +56,10 @@ namespace Fenrisulfr
                             {
                                 Console.WriteLine("Opening serial port: " + Properties.Settings.Default.DeviceCOMPort);
                                 _serialPort.Open();
+
+                                //Clear LEDs
+                                SetLEDState(1, LEDState.Off);
+                                SetLEDState(2, LEDState.Off);
                             }
 
                             while (true)
@@ -115,11 +122,11 @@ namespace Fenrisulfr
         {
             //Flash leds and get data
             SetLEDState(1, LEDState.On);
-            int sensorValue770 = RequestSensorValue(1);
+            sensorValue770 = RequestSensorValue(1);
             SetLEDState(1, LEDState.Off);
 
             SetLEDState(2, LEDState.On);
-            int sensorValue850 = RequestSensorValue(1);
+            sensorValue850 = RequestSensorValue(1);
             SetLEDState(2, LEDState.Off);
 
             _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read850 = sensorValue850, Milliseconds = _stopwatch.ElapsedMilliseconds });

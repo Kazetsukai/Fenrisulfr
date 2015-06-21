@@ -34,5 +34,65 @@ namespace Fenrisulfr.Properties {
                 this["DeviceCOMPort"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("400, 400")]
+        public global::System.Drawing.Size WindowSize {
+            get {
+                return ((global::System.Drawing.Size)(this["WindowSize"]));
+            }
+            set {
+                this["WindowSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1100")]
+        public double ChartScaleViewMaxY770nm {
+            get {
+                return ((double)(this["ChartScaleViewMaxY770nm"]));
+            }
+            set {
+                this["ChartScaleViewMaxY770nm"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1100")]
+        public double ChartScaleViewMaxY850nm {
+            get {
+                return ((double)(this["ChartScaleViewMaxY850nm"]));
+            }
+            set {
+                this["ChartScaleViewMaxY850nm"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double ChartScaleViewMinY770nm {
+            get {
+                return ((double)(this["ChartScaleViewMinY770nm"]));
+            }
+            set {
+                this["ChartScaleViewMinY770nm"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double ChartScaleViewMinY850nm {
+            get {
+                return ((double)(this["ChartScaleViewMinY850nm"]));
+            }
+            set {
+                this["ChartScaleViewMinY850nm"] = value;
+            }
+        }
     }
 }

@@ -17,17 +17,27 @@ namespace Fenrisulfr
     public partial class FNIRS : Form
     {
         private FnirsController _controller = new FnirsController();
-        private int sampleCount;
         private List<SensorResult> _trace = new List<SensorResult>();
         private DateTime _traceStart;
+
+
+        int chartWidth = 10000;
 
         public FNIRS()
         {
             InitializeComponent();
 
+            //Load user settings
+            this.Size = Properties.Settings.Default.WindowSize;
+            chart.ChartAreas[0].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY770nm, Properties.Settings.Default.ChartScaleViewMaxY770nm);
+            chart.ChartAreas[1].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY850nm, Properties.Settings.Default.ChartScaleViewMaxY850nm);
+      
+            //Initialize chart
             chart.Series[0].Color = Color.Red;
             chart.Series[1].Color = Color.Green;
-
+            chart.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
+            chart.ChartAreas[1].AxisX.ScaleView.Zoomable = true;
+                     
             //Populate comport select combo box
             string[] availablePorts = SerialPort.GetPortNames();
 
@@ -49,7 +59,7 @@ namespace Fenrisulfr
         }    
 
         private void b_StartStop_Click(object sender, EventArgs e)
-        {
+        {          
             if (_controller.GetState() == FnirsControllerState.Stopped)
             {
                 _traceStart = DateTime.Now;
@@ -62,12 +72,11 @@ namespace Fenrisulfr
             {
                 b_StartStop.Text = "Start";
                 c_comportSelect.Enabled = true;
-                sampleTimer.Stop();
                 _controller.Stop();
+                sampleTimer.Stop();                
             }
         }
-
-
+        
         private void sampleTimer_Tick(object sender, EventArgs e)
         {
             var numResults = _controller.ResultsInQueue;
@@ -76,19 +85,17 @@ namespace Fenrisulfr
                 
             while(_controller.ResultsInQueue > 0)
             { 
-                sampleCount++;
                 var result = _controller.GetNextResult();
                 _trace.Add(result);
 
                 chart.Series[0].Points.Add(new DataPoint(result.Milliseconds, result.Read770));
                 chart.Series[1].Points.Add(new DataPoint(result.Milliseconds, result.Read850));
+                                
+                chart.ChartAreas[0].AxisX.Minimum = result.Milliseconds - chartWidth;
+                chart.ChartAreas[0].AxisX.Maximum = result.Milliseconds;
 
-                int chartWidth = 1000;
-                chart.ChartAreas[0].AxisX.Minimum = sampleCount - chartWidth;
-                chart.ChartAreas[0].AxisX.Maximum = sampleCount;
-
-                chart.ChartAreas[1].AxisX.Minimum = sampleCount - chartWidth;
-                chart.ChartAreas[1].AxisX.Maximum = sampleCount;
+                chart.ChartAreas[1].AxisX.Minimum = result.Milliseconds - chartWidth;
+                chart.ChartAreas[1].AxisX.Maximum = result.Milliseconds;
             }         
      
 
@@ -137,6 +144,22 @@ namespace Fenrisulfr
             //Save comport selection to appdata settings config file
             Properties.Settings.Default.DeviceCOMPort = c_comportSelect.SelectedItem.ToString();
             Properties.Settings.Default.Save();
+        }
+
+        private void FNIRS_ResizeEnd(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.WindowSize = this.Size;
+            Properties.Settings.Default.Save();          
+        }
+
+        private void chart_AxisViewChanged(object sender, ViewEventArgs e)
+        {
+            Properties.Settings.Default.ChartScaleViewMaxY770nm = chart.ChartAreas[0].AxisY.ScaleView.ViewMaximum;
+            Properties.Settings.Default.ChartScaleViewMaxY850nm = chart.ChartAreas[1].AxisY.ScaleView.ViewMaximum;
+            Properties.Settings.Default.ChartScaleViewMinY770nm = chart.ChartAreas[0].AxisY.ScaleView.ViewMinimum;
+            Properties.Settings.Default.ChartScaleViewMinY850nm = chart.ChartAreas[1].AxisY.ScaleView.ViewMinimum;
+
+            Properties.Settings.Default.Save(); 
         }
     }
 }

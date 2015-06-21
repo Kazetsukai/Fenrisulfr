@@ -42,7 +42,7 @@ void Setup()
 
 	//Initialize ADC
 	ADMUX |=  _BV(REFS1) | _BV(REFS0);									//Select Vref=Vcc (1.1V), channel = sensor pin (PC0)
-	ADCSRA |= _BV(ADPS2) | _BV(ADPS0) | _BV(ADEN); 						//Set prescaler to 32 and enable ADC (allows sample to be taken in < 1ms)
+	ADCSRA |= _BV(ADPS2) | _BV(ADPS1) | _BV(ADPS0) | _BV(ADEN); 						//Set prescaler to 32 and enable ADC (allows sample to be taken in < 1ms)
 
 	//Initialize UART
 	usart_init(USART_BAUD_SELECT_DOUBLE_SPEED(UART_BAUD_RATE,F_CPU));
