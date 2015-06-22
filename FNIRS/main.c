@@ -32,6 +32,13 @@ uint16_t sensor_read()
 	return ADC;
 }
 
+uint8_t SINETEST_index = 0;
+uint16_t SINETEST[] = { 500,598,691,778,854,916,962,990,
+		1000,990,962,916,854,778,691,598,
+		500,402,309,222,146,84,38,10,
+		0,10,38,84,146,222,309,402};
+
+
 void Setup()
 {
 	//Set inputs
@@ -144,6 +151,13 @@ int main(void)
 			sensorAddress |= usart_receive();
 
 			uint16_t sensorValue = GetSensorValue(sensorAddress);
+
+			/*
+			SINETEST_index+= 8;
+			if (SINETEST_index >= 32)
+			{
+				SINETEST_index = 0;
+			}*/
 
 			//Send the data to PC
 			usart_send(CMD_SENSORREAD);

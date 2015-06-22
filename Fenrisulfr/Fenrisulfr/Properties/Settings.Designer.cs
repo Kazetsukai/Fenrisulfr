@@ -106,5 +106,17 @@ namespace Fenrisulfr.Properties {
                 this["SampleRate"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("64")]
+        public int FFTWindowSize {
+            get {
+                return ((int)(this["FFTWindowSize"]));
+            }
+            set {
+                this["FFTWindowSize"] = value;
+            }
+        }
     }
 }

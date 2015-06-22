@@ -29,27 +29,37 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint1 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, 0D);
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint2 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, 0D);
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title1 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint3 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, 0D);
             System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint4 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, 0D);
-            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title3 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.Windows.Forms.DataVisualization.Charting.Title title4 = new System.Windows.Forms.DataVisualization.Charting.Title();
             this.UI_UpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.b_StartStop = new System.Windows.Forms.Button();
             this.t_sampleRate = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.chart = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.chartData = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.lblSamples = new System.Windows.Forms.Label();
             this.btnSaveTrace = new System.Windows.Forms.Button();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.c_comportSelect = new System.Windows.Forms.ComboBox();
             this.l_comport = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.chart)).BeginInit();
+            this.chartFFT = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.t_windowSize = new System.Windows.Forms.TextBox();
+            this.l_FFTWindowSize = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.chartData)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartFFT)).BeginInit();
             this.SuspendLayout();
             // 
             // UI_UpdateTimer
@@ -86,74 +96,74 @@
             this.label1.TabIndex = 8;
             this.label1.Text = "Sample rate (Hz): ";
             // 
-            // chart
+            // chartData
             // 
-            this.chart.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.chartData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.chart.BackColor = System.Drawing.Color.Transparent;
-            chartArea3.AxisX.Minimum = 0D;
-            chartArea3.AxisX.ScaleView.MinSize = 10D;
-            chartArea3.AxisX.ScaleView.MinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
-            chartArea3.AxisX.ScaleView.SizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
-            chartArea3.AxisY.Maximum = 1100D;
-            chartArea3.AxisY.Minimum = 0D;
-            chartArea3.AxisY.ScaleView.MinSize = 10D;
-            chartArea3.AxisY.ScaleView.SmallScrollMinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
-            chartArea3.BackColor = System.Drawing.Color.Transparent;
-            chartArea3.CursorX.LineColor = System.Drawing.Color.White;
-            chartArea3.CursorY.IsUserEnabled = true;
-            chartArea3.CursorY.IsUserSelectionEnabled = true;
-            chartArea3.CursorY.LineColor = System.Drawing.Color.White;
-            chartArea3.Name = "ChartArea_770";
-            chartArea4.AxisY.Maximum = 1100D;
-            chartArea4.BackColor = System.Drawing.Color.Transparent;
-            chartArea4.CursorX.LineColor = System.Drawing.Color.White;
-            chartArea4.CursorY.IsUserEnabled = true;
-            chartArea4.CursorY.IsUserSelectionEnabled = true;
-            chartArea4.CursorY.LineColor = System.Drawing.Color.White;
-            chartArea4.Name = "ChartArea_850";
-            this.chart.ChartAreas.Add(chartArea3);
-            this.chart.ChartAreas.Add(chartArea4);
-            this.chart.Location = new System.Drawing.Point(18, 51);
-            this.chart.Name = "chart";
-            series5.ChartArea = "ChartArea_770";
-            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series5.MarkerSize = 10;
-            series5.Name = "S1_770_Raw";
-            series5.Points.Add(dataPoint3);
-            series6.ChartArea = "ChartArea_850";
-            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series6.MarkerSize = 10;
-            series6.Name = "S1_850_Raw";
-            series6.Points.Add(dataPoint4);
-            series7.ChartArea = "ChartArea_770";
-            series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series7.Name = "S1_770_MovAvg";
-            series8.ChartArea = "ChartArea_770";
-            series8.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series8.Name = "S1_850_MovAvg";
-            this.chart.Series.Add(series5);
-            this.chart.Series.Add(series6);
-            this.chart.Series.Add(series7);
-            this.chart.Series.Add(series8);
-            this.chart.Size = new System.Drawing.Size(957, 493);
-            this.chart.TabIndex = 9;
-            this.chart.Text = "chart";
-            title3.Alignment = System.Drawing.ContentAlignment.TopCenter;
-            title3.DockedToChartArea = "ChartArea_770";
-            title3.IsDockedInsideChartArea = false;
-            title3.Name = "Title1";
-            title3.Text = "770nm";
-            title4.Alignment = System.Drawing.ContentAlignment.TopCenter;
-            title4.DockedToChartArea = "ChartArea_850";
-            title4.IsDockedInsideChartArea = false;
-            title4.Name = "Title2";
-            title4.Text = "850nm";
-            this.chart.Titles.Add(title3);
-            this.chart.Titles.Add(title4);
-            this.chart.AxisViewChanged += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.ViewEventArgs>(this.chart_AxisViewChanged);
-            this.chart.Click += new System.EventHandler(this.chart_Click);
+            this.chartData.BackColor = System.Drawing.Color.Transparent;
+            chartArea1.AxisX.Minimum = 0D;
+            chartArea1.AxisX.ScaleView.MinSize = 10D;
+            chartArea1.AxisX.ScaleView.MinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
+            chartArea1.AxisX.ScaleView.SizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
+            chartArea1.AxisY.Maximum = 1100D;
+            chartArea1.AxisY.Minimum = 0D;
+            chartArea1.AxisY.ScaleView.MinSize = 10D;
+            chartArea1.AxisY.ScaleView.SmallScrollMinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
+            chartArea1.BackColor = System.Drawing.Color.Transparent;
+            chartArea1.CursorX.LineColor = System.Drawing.Color.White;
+            chartArea1.CursorY.IsUserEnabled = true;
+            chartArea1.CursorY.IsUserSelectionEnabled = true;
+            chartArea1.CursorY.LineColor = System.Drawing.Color.White;
+            chartArea1.Name = "ChartArea_770";
+            chartArea2.AxisY.Maximum = 1100D;
+            chartArea2.BackColor = System.Drawing.Color.Transparent;
+            chartArea2.CursorX.LineColor = System.Drawing.Color.White;
+            chartArea2.CursorY.IsUserEnabled = true;
+            chartArea2.CursorY.IsUserSelectionEnabled = true;
+            chartArea2.CursorY.LineColor = System.Drawing.Color.White;
+            chartArea2.Name = "ChartArea_850";
+            this.chartData.ChartAreas.Add(chartArea1);
+            this.chartData.ChartAreas.Add(chartArea2);
+            this.chartData.Location = new System.Drawing.Point(12, 51);
+            this.chartData.Name = "chartData";
+            series1.ChartArea = "ChartArea_770";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.MarkerSize = 10;
+            series1.Name = "S1_770_Raw";
+            series1.Points.Add(dataPoint1);
+            series2.ChartArea = "ChartArea_850";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.MarkerSize = 10;
+            series2.Name = "S1_850_Raw";
+            series2.Points.Add(dataPoint2);
+            series3.ChartArea = "ChartArea_770";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series3.Name = "S1_770_MovAvg";
+            series4.ChartArea = "ChartArea_770";
+            series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series4.Name = "S1_850_MovAvg";
+            this.chartData.Series.Add(series1);
+            this.chartData.Series.Add(series2);
+            this.chartData.Series.Add(series3);
+            this.chartData.Series.Add(series4);
+            this.chartData.Size = new System.Drawing.Size(578, 465);
+            this.chartData.TabIndex = 9;
+            this.chartData.Text = "chart";
+            title1.Alignment = System.Drawing.ContentAlignment.TopCenter;
+            title1.DockedToChartArea = "ChartArea_770";
+            title1.IsDockedInsideChartArea = false;
+            title1.Name = "Title1";
+            title1.Text = "770nm";
+            title2.Alignment = System.Drawing.ContentAlignment.TopCenter;
+            title2.DockedToChartArea = "ChartArea_850";
+            title2.IsDockedInsideChartArea = false;
+            title2.Name = "Title2";
+            title2.Text = "850nm";
+            this.chartData.Titles.Add(title1);
+            this.chartData.Titles.Add(title2);
+            this.chartData.AxisViewChanged += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.ViewEventArgs>(this.chart_AxisViewChanged);
+            this.chartData.Click += new System.EventHandler(this.chart_Click);
             // 
             // lblSamples
             // 
@@ -198,25 +208,85 @@
             this.l_comport.TabIndex = 13;
             this.l_comport.Text = "COM Port:";
             // 
+            // chartFFT
+            // 
+            this.chartFFT.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.chartFFT.BackColor = System.Drawing.Color.Transparent;
+            chartArea3.BackColor = System.Drawing.Color.Transparent;
+            chartArea3.CursorX.Interval = 1E-05D;
+            chartArea3.CursorX.IsUserEnabled = true;
+            chartArea3.CursorX.IsUserSelectionEnabled = true;
+            chartArea3.CursorX.LineColor = System.Drawing.Color.White;
+            chartArea3.Name = "ChartArea_770";
+            chartArea4.BackColor = System.Drawing.Color.Transparent;
+            chartArea4.CursorX.Interval = 1E-05D;
+            chartArea4.CursorX.IsUserEnabled = true;
+            chartArea4.CursorX.IsUserSelectionEnabled = true;
+            chartArea4.CursorX.LineColor = System.Drawing.Color.White;
+            chartArea4.Name = "ChartArea_850";
+            this.chartFFT.ChartAreas.Add(chartArea3);
+            this.chartFFT.ChartAreas.Add(chartArea4);
+            this.chartFFT.Location = new System.Drawing.Point(578, 95);
+            this.chartFFT.Name = "chartFFT";
+            series5.ChartArea = "ChartArea_770";
+            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series5.Name = "S1_770_FFT";
+            series5.Points.Add(dataPoint3);
+            series6.ChartArea = "ChartArea_850";
+            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series6.Name = "S1_850_FFT";
+            series6.Points.Add(dataPoint4);
+            this.chartFFT.Series.Add(series5);
+            this.chartFFT.Series.Add(series6);
+            this.chartFFT.Size = new System.Drawing.Size(377, 421);
+            this.chartFFT.TabIndex = 14;
+            this.chartFFT.Text = "chart1";
+            // 
+            // t_windowSize
+            // 
+            this.t_windowSize.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.t_windowSize.Location = new System.Drawing.Point(839, 51);
+            this.t_windowSize.Name = "t_windowSize";
+            this.t_windowSize.Size = new System.Drawing.Size(100, 20);
+            this.t_windowSize.TabIndex = 15;
+            this.t_windowSize.Text = "64";
+            this.t_windowSize.TextChanged += new System.EventHandler(this.t_windowSize_TextChanged);
+            // 
+            // l_FFTWindowSize
+            // 
+            this.l_FFTWindowSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.l_FFTWindowSize.AutoSize = true;
+            this.l_FFTWindowSize.Location = new System.Drawing.Point(691, 54);
+            this.l_FFTWindowSize.Name = "l_FFTWindowSize";
+            this.l_FFTWindowSize.Size = new System.Drawing.Size(142, 13);
+            this.l_FFTWindowSize.TabIndex = 16;
+            this.l_FFTWindowSize.Text = "FFT Window size (samples) :";
+            // 
             // FNIRS
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(987, 556);
+            this.ClientSize = new System.Drawing.Size(990, 528);
+            this.Controls.Add(this.l_FFTWindowSize);
+            this.Controls.Add(this.t_windowSize);
+            this.Controls.Add(this.chartFFT);
             this.Controls.Add(this.l_comport);
             this.Controls.Add(this.c_comportSelect);
             this.Controls.Add(this.btnSaveTrace);
             this.Controls.Add(this.lblSamples);
-            this.Controls.Add(this.chart);
+            this.Controls.Add(this.chartData);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.t_sampleRate);
             this.Controls.Add(this.b_StartStop);
-            this.MinimumSize = new System.Drawing.Size(400, 400);
+            this.MinimumSize = new System.Drawing.Size(1000, 560);
             this.Name = "FNIRS";
             this.Text = "Fenrisulfr";
             this.Load += new System.EventHandler(this.FNIRS_Load);
             this.ResizeEnd += new System.EventHandler(this.FNIRS_ResizeEnd);
-            ((System.ComponentModel.ISupportInitialize)(this.chart)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartData)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartFFT)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -228,12 +298,15 @@
         private System.Windows.Forms.Button b_StartStop;
         private System.Windows.Forms.TextBox t_sampleRate;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.DataVisualization.Charting.Chart chart;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartData;
         private System.Windows.Forms.Label lblSamples;
         private System.Windows.Forms.Button btnSaveTrace;
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
         private System.Windows.Forms.ComboBox c_comportSelect;
         private System.Windows.Forms.Label l_comport;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartFFT;
+        private System.Windows.Forms.TextBox t_windowSize;
+        private System.Windows.Forms.Label l_FFTWindowSize;
     }
 }
 

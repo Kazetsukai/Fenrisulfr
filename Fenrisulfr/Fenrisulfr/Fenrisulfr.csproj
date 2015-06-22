@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MathNet.Iridium">
+      <HintPath>..\MathNet.Iridium-2008.8.16.470\Binaries\Debug\MathNet.Iridium.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms.DataVisualization" />

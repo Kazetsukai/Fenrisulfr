@@ -36,6 +36,11 @@ namespace Fenrisulfr
             Console.WriteLine("Sample period set to " + _samplePeriod_ms.ToString() + " ms. (Sample rate = " + SampleRateHz.ToString() + " Hz)");
         }
 
+        public double GetSampleRate()
+        {
+            return (double)(1000.0 / _samplePeriod_ms);
+        }
+
         public FnirsControllerState GetState()
         {
             return _state;
@@ -73,7 +78,7 @@ namespace Fenrisulfr
                             while (true)
                             {
                                 DoWork();
-                                Thread.Sleep(_samplePeriod_ms);
+                                Thread.Sleep(_samplePeriod_ms - 3); //Why 3?! Can we get rid of this delay some how? Otherwise the sample rate is wrong!
                             }
                         }
                         catch (Exception ex)

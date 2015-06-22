@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MathNet.Numerics.Transformations;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -19,9 +20,8 @@ namespace Fenrisulfr
         private FnirsController _controller = new FnirsController();
         private List<SensorResult> _trace = new List<SensorResult>();
         private DateTime _traceStart;
-
-
-        int chartWidth = 10000;
+        
+        int _chartWidth = 10000;
 
         public FNIRS()
         {
@@ -30,19 +30,26 @@ namespace Fenrisulfr
             //Load user settings
             this.Size = Properties.Settings.Default.WindowSize;
             t_sampleRate.Text = Properties.Settings.Default.SampleRate.ToString();
-            chart.ChartAreas["ChartArea_770"].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY770nm, Properties.Settings.Default.ChartScaleViewMaxY770nm);
-            chart.ChartAreas["ChartArea_850"].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY850nm, Properties.Settings.Default.ChartScaleViewMaxY850nm);
-      
-            //Initialize chart
-            chart.Series["S1_770_Raw"].Color = Color.DarkGreen;
-            chart.Series["S1_770_MovAvg"].Color = Color.Green;
-            chart.Series["S1_770_MovAvg"].BorderWidth = 2;
-            chart.Series["S1_850_Raw"].Color = Color.DarkRed;
-            chart.Series["S1_850_MovAvg"].Color = Color.Red;
-
-            chart.ChartAreas["ChartArea_770"].AxisX.ScaleView.Zoomable = true;
-            chart.ChartAreas["ChartArea_850"].AxisX.ScaleView.Zoomable = true;
+            t_windowSize.Text = Properties.Settings.Default.FFTWindowSize.ToString();
+            chartData.ChartAreas["ChartArea_770"].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY770nm, Properties.Settings.Default.ChartScaleViewMaxY770nm);
+            chartData.ChartAreas["ChartArea_850"].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY850nm, Properties.Settings.Default.ChartScaleViewMaxY850nm);
             
+            //Initialize charts
+            int borderWidth = 2;
+            chartData.Series["S1_770_Raw"].Color = Color.DarkGreen;
+            chartData.Series["S1_850_Raw"].Color = Color.DarkRed;
+            chartData.Series["S1_770_Raw"].BorderWidth = borderWidth;
+            chartData.Series["S1_850_Raw"].BorderWidth = borderWidth;
+            chartData.ChartAreas["ChartArea_770"].AxisX.ScaleView.Zoomable = true;
+            chartData.ChartAreas["ChartArea_850"].AxisX.ScaleView.Zoomable = true;
+
+            chartFFT.Series["S1_770_FFT"].Color = Color.DarkGreen;
+            chartFFT.Series["S1_850_FFT"].Color = Color.DarkRed;
+            chartFFT.Series["S1_770_FFT"].BorderWidth = borderWidth;
+            chartFFT.Series["S1_850_FFT"].BorderWidth = borderWidth;
+            chartFFT.ChartAreas["ChartArea_770"].AxisX.ScaleView.Zoomable = true;
+            chartFFT.ChartAreas["ChartArea_850"].AxisX.ScaleView.Zoomable = true;
+
             //Populate comport select combo box
             string[] availablePorts = SerialPort.GetPortNames();
 
@@ -63,28 +70,73 @@ namespace Fenrisulfr
             }         
         }    
 
+        //might be useful for debugging
+        private void PrintFFT(double[] data, int windowSize)
+        {        
+            //Calculate real and imag parts of frequency. Output of FFT for real data is mirror imaged, so there will be (2 * windowSize) elements in freqReal[] and freqImag[]
+            double[] freqReal, freqImag;
+            RealFourierTransformation rft = new RealFourierTransformation();
+            rft.TransformForward(data, out freqReal, out freqImag);
+
+            double[] dataOut = new double[windowSize];
+
+            //We only take first half of data (windowSize = half of freqReal[] size)
+            for (int i = 0; i < windowSize; i++)
+            {                
+                Console.WriteLine(freqReal[i] + "\t" + freqImag[i]);
+            }
+        }
+
+        private List<DataPoint> GetSeriesFFT(List<DataPoint> discreteData, int windowSize, double sampleRate)
+        {
+            //Populate data
+            double[] dataIn = new double[windowSize];
+            for(int i = 0; i < discreteData.Count; i++)
+            {
+                dataIn[i] = discreteData[i].YValues[0];
+            }
+
+            //Calculate distance between frequencies on FFT plot
+            double freqBinWidth = sampleRate / windowSize;
+
+            //Calculate real and imag parts of frequency. Output of FFT for real data is mirror imaged, so there will be (2 * windowSize) elements in freqReal[] and freqImag[]
+            double[] freqReal, freqImag;
+            RealFourierTransformation rft = new RealFourierTransformation();
+            rft.TransformForward(dataIn, out freqReal, out freqImag);
+
+            List<DataPoint> dataOut = new List<DataPoint>(windowSize / 2);      
+
+            //We only take first half of data (windowSize = half of freqReal[] size)
+            for (int i = 0; i < windowSize / 2; i++)
+            {
+                double magnitude = Math.Sqrt((freqReal[i] * freqReal[i]) + (freqImag[i] * freqImag[i]));                
+                dataOut.Add(new DataPoint(i * freqBinWidth / 2, magnitude));
+                //Console.WriteLine(freqReal[i] + "\t" + freqImag[i]);
+            }           
+            return dataOut;
+        }
+
         private void b_StartStop_Click(object sender, EventArgs e)
-        {          
+        {            
             if (_controller.GetState() == FnirsControllerState.Stopped)
             {
                 //Check sample rate is valid
-                double sampleRate;
-
-                try
-                {
-                    double.TryParse(t_sampleRate.Text, out sampleRate);
-                    if (sampleRate <= 0)
-                    {
-                        MessageBox.Show("Invalid sample rate. Must be a number greater than zero Hz.");
-                        return;
-                    }
-
-                }
-                catch
+                double sampleRate = Properties.Settings.Default.SampleRate;
+               
+                if (sampleRate <= 0)
                 {
                     MessageBox.Show("Invalid sample rate. Must be a number greater than zero Hz.");
                     return;
-                }          
+                }   
+    
+                //Check FFT window size is valid
+                int fftWindowSize = Properties.Settings.Default.FFTWindowSize;
+                
+                if((fftWindowSize & (fftWindowSize -1)) != 0) //Check fft window size is power of 2
+                {
+                    MessageBox.Show("FFT window size must be a power of 2! (e.g, 32, 64, 128, etc)");
+                    return;
+                }
 
                 _traceStart = DateTime.Now;
                 b_StartStop.Text = "Stop";
@@ -116,19 +168,52 @@ namespace Fenrisulfr
                 var result = _controller.GetNextResult();
                 _trace.Add(result);
 
-                chart.Series["S1_770_Raw"].Points.Add(new DataPoint(result.Milliseconds, result.Read770));
-                chart.Series["S1_850_Raw"].Points.Add(new DataPoint(result.Milliseconds, result.Read850));
-                
-                if (chart.Series["S1_850_Raw"].Points.Count > 100)
+                //Update data chart
+                chartData.Series["S1_770_Raw"].Points.Add(new DataPoint(result.Milliseconds, result.Read770));
+                chartData.Series["S1_850_Raw"].Points.Add(new DataPoint(result.Milliseconds, result.Read850));
+                                
+                chartData.ChartAreas["ChartArea_770"].AxisX.Minimum = result.Milliseconds - _chartWidth;
+                chartData.ChartAreas["ChartArea_770"].AxisX.Maximum = result.Milliseconds;
+
+                chartData.ChartAreas["ChartArea_850"].AxisX.Minimum = result.Milliseconds - _chartWidth;
+                chartData.ChartAreas["ChartArea_850"].AxisX.Maximum = result.Milliseconds;
+                                
+                //Update FFT chart                
+                if (chartData.Series["S1_770_Raw"].Points.Count > Properties.Settings.Default.FFTWindowSize)
                 {
-                    chart.DataManipulator.FinancialFormula(FinancialFormula.MovingAverage, chart.Series["S1_770_Raw"], chart.Series["S1_770_MovAvg"]);
+                    List<DataPoint> fftWindowData = new List<DataPoint>();
+                
+                    for (int i = 0; i < Properties.Settings.Default.FFTWindowSize; i++)
+                    {
+                        fftWindowData.Add(chartData.Series["S1_770_Raw"].Points[(chartData.Series["S1_770_Raw"].Points.Count - 1) - (Properties.Settings.Default.FFTWindowSize - i)]);
+                    }
+
+                    List<DataPoint> fftData770 = GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate());
+                    chartFFT.Series["S1_770_FFT"].Points.Clear();
+                
+                    foreach (DataPoint point in fftData770)
+                    {
+                        chartFFT.Series["S1_770_FFT"].Points.Add(point);
+                    }
                 }
 
-                chart.ChartAreas["ChartArea_770"].AxisX.Minimum = result.Milliseconds - chartWidth;
-                chart.ChartAreas["ChartArea_770"].AxisX.Maximum = result.Milliseconds;
+                if (chartData.Series["S1_850_Raw"].Points.Count > Properties.Settings.Default.FFTWindowSize)
+                {
+                    List<DataPoint> fftWindowData = new List<DataPoint>();
 
-                chart.ChartAreas["ChartArea_850"].AxisX.Minimum = result.Milliseconds - chartWidth;
-                chart.ChartAreas["ChartArea_850"].AxisX.Maximum = result.Milliseconds;
+                    for (int i = 0; i < Properties.Settings.Default.FFTWindowSize; i++)
+                    {
+                        fftWindowData.Add(chartData.Series["S1_850_Raw"].Points[(chartData.Series["S1_850_Raw"].Points.Count - 1) - (Properties.Settings.Default.FFTWindowSize - i)]);
+                    }
+
+                    List<DataPoint> fftData850 = GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate());
+                    chartFFT.Series["S1_850_FFT"].Points.Clear();
+
+                    foreach (DataPoint point in fftData850)
+                    {
+                        chartFFT.Series["S1_850_FFT"].Points.Add(point);
+                    }
+                }
             }         
      
             // Only let people save if there are samples to save
@@ -186,10 +271,10 @@ namespace Fenrisulfr
 
         private void chart_AxisViewChanged(object sender, ViewEventArgs e)
         {
-            Properties.Settings.Default.ChartScaleViewMaxY770nm = chart.ChartAreas["ChartArea_770"].AxisY.ScaleView.ViewMaximum;
-            Properties.Settings.Default.ChartScaleViewMaxY850nm = chart.ChartAreas["ChartArea_850"].AxisY.ScaleView.ViewMaximum;
-            Properties.Settings.Default.ChartScaleViewMinY770nm = chart.ChartAreas["ChartArea_770"].AxisY.ScaleView.ViewMinimum;
-            Properties.Settings.Default.ChartScaleViewMinY850nm = chart.ChartAreas["ChartArea_850"].AxisY.ScaleView.ViewMinimum;
+            Properties.Settings.Default.ChartScaleViewMaxY770nm = chartData.ChartAreas["ChartArea_770"].AxisY.ScaleView.ViewMaximum;
+            Properties.Settings.Default.ChartScaleViewMaxY850nm = chartData.ChartAreas["ChartArea_850"].AxisY.ScaleView.ViewMaximum;
+            Properties.Settings.Default.ChartScaleViewMinY770nm = chartData.ChartAreas["ChartArea_770"].AxisY.ScaleView.ViewMinimum;
+            Properties.Settings.Default.ChartScaleViewMinY850nm = chartData.ChartAreas["ChartArea_850"].AxisY.ScaleView.ViewMinimum;
 
             Properties.Settings.Default.Save(); 
         }
@@ -208,6 +293,23 @@ namespace Fenrisulfr
             catch
             {
                 t_sampleRate.Text = Properties.Settings.Default.SampleRate.ToString();
+            }
+        }
+
+        private void t_windowSize_TextChanged(object sender, EventArgs e)
+        {
+            int fftWindowSize;
+
+            try
+            {
+                int.TryParse(t_windowSize.Text, out fftWindowSize);
+                Properties.Settings.Default.FFTWindowSize = fftWindowSize;
+                Properties.Settings.Default.Save();
+
+            }
+            catch
+            {
+                t_windowSize.Text = Properties.Settings.Default.FFTWindowSize.ToString();
             }
         }
     }
