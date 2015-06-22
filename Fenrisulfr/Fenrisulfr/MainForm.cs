@@ -47,8 +47,7 @@ namespace Fenrisulfr
             chartFFT.Series["S1_850_FFT"].Color = Color.DarkRed;
             chartFFT.Series["S1_770_FFT"].BorderWidth = borderWidth;
             chartFFT.Series["S1_850_FFT"].BorderWidth = borderWidth;
-            chartFFT.ChartAreas["ChartArea_770"].AxisX.ScaleView.Zoomable = true;
-            chartFFT.ChartAreas["ChartArea_850"].AxisX.ScaleView.Zoomable = true;
+            chartFFT.ChartAreas["ChartArea"].AxisX.ScaleView.Zoomable = true;
 
             //Populate comport select combo box
             string[] availablePorts = SerialPort.GetPortNames();
