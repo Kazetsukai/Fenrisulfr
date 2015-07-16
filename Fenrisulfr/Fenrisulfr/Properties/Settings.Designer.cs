@@ -49,7 +49,7 @@ namespace Fenrisulfr.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1100")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public double ChartScaleViewMaxY770nm {
             get {
                 return ((double)(this["ChartScaleViewMaxY770nm"]));
@@ -61,13 +61,13 @@ namespace Fenrisulfr.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1100")]
-        public double ChartScaleViewMaxY850nm {
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        public double ChartScaleViewMaxY940nm {
             get {
-                return ((double)(this["ChartScaleViewMaxY850nm"]));
+                return ((double)(this["ChartScaleViewMaxY940nm"]));
             }
             set {
-                this["ChartScaleViewMaxY850nm"] = value;
+                this["ChartScaleViewMaxY940nm"] = value;
             }
         }
         
@@ -86,12 +86,12 @@ namespace Fenrisulfr.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double ChartScaleViewMinY850nm {
+        public double ChartScaleViewMinY940nm {
             get {
-                return ((double)(this["ChartScaleViewMinY850nm"]));
+                return ((double)(this["ChartScaleViewMinY940nm"]));
             }
             set {
-                this["ChartScaleViewMinY850nm"] = value;
+                this["ChartScaleViewMinY940nm"] = value;
             }
         }
         

@@ -22,6 +22,7 @@ namespace Fenrisulfr
         private DateTime _traceStart;
         
         int _chartWidth = 10000;
+        bool _useButterworth;
 
         public FNIRS()
         {
@@ -31,22 +32,22 @@ namespace Fenrisulfr
             this.Size = Properties.Settings.Default.WindowSize;
             t_sampleRate.Text = Properties.Settings.Default.SampleRate.ToString();
             t_windowSize.Text = Properties.Settings.Default.FFTWindowSize.ToString();
-            chartData.ChartAreas["ChartArea_770"].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY770nm, Properties.Settings.Default.ChartScaleViewMaxY770nm);
-            chartData.ChartAreas["ChartArea_850"].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY850nm, Properties.Settings.Default.ChartScaleViewMaxY850nm);
+            chartData.ChartAreas["ChartArea_770"].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY770nm, 10000);//Properties.Settings.Default.ChartScaleViewMaxY770nm);
+            chartData.ChartAreas["ChartArea_940"].AxisY.ScaleView.Zoom(Properties.Settings.Default.ChartScaleViewMinY940nm, 10000);//Properties.Settings.Default.ChartScaleViewMaxY940nm);
             
             //Initialize charts
             int borderWidth = 2;
             chartData.Series["S1_770_Raw"].Color = Color.DarkGreen;
-            chartData.Series["S1_850_Raw"].Color = Color.DarkRed;
+            chartData.Series["S1_940_Raw"].Color = Color.DarkRed;
             chartData.Series["S1_770_Raw"].BorderWidth = borderWidth;
-            chartData.Series["S1_850_Raw"].BorderWidth = borderWidth;
+            chartData.Series["S1_940_Raw"].BorderWidth = borderWidth;
             chartData.ChartAreas["ChartArea_770"].AxisX.ScaleView.Zoomable = true;
-            chartData.ChartAreas["ChartArea_850"].AxisX.ScaleView.Zoomable = true;
+            chartData.ChartAreas["ChartArea_940"].AxisX.ScaleView.Zoomable = true;
 
             chartFFT.Series["S1_770_FFT"].Color = Color.DarkGreen;
-            chartFFT.Series["S1_850_FFT"].Color = Color.DarkRed;
+            chartFFT.Series["S1_940_FFT"].Color = Color.DarkRed;
             chartFFT.Series["S1_770_FFT"].BorderWidth = borderWidth;
-            chartFFT.Series["S1_850_FFT"].BorderWidth = borderWidth;
+            chartFFT.Series["S1_940_FFT"].BorderWidth = borderWidth;
             chartFFT.ChartAreas["ChartArea"].AxisX.ScaleView.Zoomable = true;
 
             //Populate comport select combo box
@@ -141,6 +142,7 @@ namespace Fenrisulfr
                 b_StartStop.Text = "Stop";
                 c_comportSelect.Enabled = false;
                 t_sampleRate.Enabled = false;
+                t_windowSize.Enabled = false;
 
                 _controller.SetSampleRate(sampleRate);
                 _controller.Start();
@@ -148,11 +150,32 @@ namespace Fenrisulfr
             }
             else if (_controller.GetState() == FnirsControllerState.Running)
             {
+                _controller.Stop();
+                UI_UpdateTimer.Stop();   
                 b_StartStop.Text = "Start";
                 c_comportSelect.Enabled = true;
                 t_sampleRate.Enabled = true;
-                _controller.Stop();
-                UI_UpdateTimer.Stop();                
+                t_windowSize.Enabled = true;                             
+            }
+        }
+
+        private void ButterworthFilter(List<DataPoint> fftSignal, double sampleFrequency, int order, double f0, double DCGain)
+        {
+            //Assumes input fftSignal has been halved to remove negative mirror image 
+            if (f0 > 0)
+            {
+                var N = fftSignal.Count;
+                var numBins = N;  
+                var binWidth = sampleFrequency / N; // Hz
+
+                // Filter
+                Parallel.For(1, N, i =>
+                {
+                    var binFreq = binWidth * i;
+                    var gain = DCGain / (Math.Sqrt((1 + Math.Pow(binFreq / f0, 2.0 * order))));                   
+                    fftSignal[i].YValues[0] *= gain;
+                    fftSignal[N - i].YValues[0] *= gain;
+                });
             }
         }
         
@@ -169,48 +192,64 @@ namespace Fenrisulfr
 
                 //Update data chart
                 chartData.Series["S1_770_Raw"].Points.Add(new DataPoint(result.Milliseconds, result.Read770));
-                chartData.Series["S1_850_Raw"].Points.Add(new DataPoint(result.Milliseconds, result.Read850));
+                chartData.Series["S1_940_Raw"].Points.Add(new DataPoint(result.Milliseconds, result.Read940));
                                 
                 chartData.ChartAreas["ChartArea_770"].AxisX.Minimum = result.Milliseconds - _chartWidth;
                 chartData.ChartAreas["ChartArea_770"].AxisX.Maximum = result.Milliseconds;
 
-                chartData.ChartAreas["ChartArea_850"].AxisX.Minimum = result.Milliseconds - _chartWidth;
-                chartData.ChartAreas["ChartArea_850"].AxisX.Maximum = result.Milliseconds;
-                                
+                chartData.ChartAreas["ChartArea_940"].AxisX.Minimum = result.Milliseconds - _chartWidth;
+                chartData.ChartAreas["ChartArea_940"].AxisX.Maximum = result.Milliseconds;
+                
                 //Update FFT chart                
                 if (chartData.Series["S1_770_Raw"].Points.Count > Properties.Settings.Default.FFTWindowSize)
                 {
                     List<DataPoint> fftWindowData = new List<DataPoint>();
                 
+                    //Populate list of data to perform FFT on
                     for (int i = 0; i < Properties.Settings.Default.FFTWindowSize; i++)
                     {
                         fftWindowData.Add(chartData.Series["S1_770_Raw"].Points[(chartData.Series["S1_770_Raw"].Points.Count - 1) - (Properties.Settings.Default.FFTWindowSize - i)]);
                     }
 
-                    List<DataPoint> fftData770 = GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate());
                     chartFFT.Series["S1_770_FFT"].Points.Clear();
+
+                    //Apply FFT to the data
+                    List<DataPoint> fftData770 = GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate());
+
+                    //Apply butterworth filter
+                    if (_useButterworth)
+                    {
+                        ButterworthFilter(fftData770, Properties.Settings.Default.SampleRate, 3, 20, 30);
+                    }
+
+                    /*
+                    foreach (DataPoint point in fftData770)
+                    {
+                        
+                    }    */               
                 
+                    //Draw the data on the chart
                     foreach (DataPoint point in fftData770)
                     {
                         chartFFT.Series["S1_770_FFT"].Points.Add(point);
                     }
                 }
 
-                if (chartData.Series["S1_850_Raw"].Points.Count > Properties.Settings.Default.FFTWindowSize)
+                if (chartData.Series["S1_940_Raw"].Points.Count > Properties.Settings.Default.FFTWindowSize)
                 {
                     List<DataPoint> fftWindowData = new List<DataPoint>();
 
                     for (int i = 0; i < Properties.Settings.Default.FFTWindowSize; i++)
                     {
-                        fftWindowData.Add(chartData.Series["S1_850_Raw"].Points[(chartData.Series["S1_850_Raw"].Points.Count - 1) - (Properties.Settings.Default.FFTWindowSize - i)]);
+                        fftWindowData.Add(chartData.Series["S1_940_Raw"].Points[(chartData.Series["S1_940_Raw"].Points.Count - 1) - (Properties.Settings.Default.FFTWindowSize - i)]);
                     }
 
-                    List<DataPoint> fftData850 = GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate());
-                    chartFFT.Series["S1_850_FFT"].Points.Clear();
+                    List<DataPoint> fftData940 = GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate());
+                    chartFFT.Series["S1_940_FFT"].Points.Clear();
 
-                    foreach (DataPoint point in fftData850)
+                    foreach (DataPoint point in fftData940)
                     {
-                        chartFFT.Series["S1_850_FFT"].Points.Add(point);
+                        chartFFT.Series["S1_940_FFT"].Points.Add(point);
                     }
                 }
             }         
@@ -247,10 +286,10 @@ namespace Fenrisulfr
             {
                 using (var writer = new StreamWriter(saveFileDialog.OpenFile()))
                 {
-                    writer.WriteLine("{0},{1},{2}", "Milliseconds", "770nm", "850nm");
+                    writer.WriteLine("{0},{1},{2}", "Milliseconds", "770nm", "940nm");
 
                     foreach (var result in _trace)
-                        writer.WriteLine("{0},{1},{2}", result.Milliseconds, result.Read770, result.Read850);
+                        writer.WriteLine("{0},{1},{2}", result.Milliseconds, result.Read770, result.Read940);
                 }
             }
         }
@@ -271,9 +310,9 @@ namespace Fenrisulfr
         private void chart_AxisViewChanged(object sender, ViewEventArgs e)
         {
             Properties.Settings.Default.ChartScaleViewMaxY770nm = chartData.ChartAreas["ChartArea_770"].AxisY.ScaleView.ViewMaximum;
-            Properties.Settings.Default.ChartScaleViewMaxY850nm = chartData.ChartAreas["ChartArea_850"].AxisY.ScaleView.ViewMaximum;
+            Properties.Settings.Default.ChartScaleViewMaxY940nm = chartData.ChartAreas["ChartArea_940"].AxisY.ScaleView.ViewMaximum;
             Properties.Settings.Default.ChartScaleViewMinY770nm = chartData.ChartAreas["ChartArea_770"].AxisY.ScaleView.ViewMinimum;
-            Properties.Settings.Default.ChartScaleViewMinY850nm = chartData.ChartAreas["ChartArea_850"].AxisY.ScaleView.ViewMinimum;
+            Properties.Settings.Default.ChartScaleViewMinY940nm = chartData.ChartAreas["ChartArea_940"].AxisY.ScaleView.ViewMinimum;
 
             Properties.Settings.Default.Save(); 
         }
@@ -310,6 +349,11 @@ namespace Fenrisulfr
             {
                 t_windowSize.Text = Properties.Settings.Default.FFTWindowSize.ToString();
             }
+        }
+
+        private void ch_butterworthApply_CheckedChanged(object sender, EventArgs e)
+        {
+            _useButterworth = ch_butterworthApply.Checked;
         }
     }
 }

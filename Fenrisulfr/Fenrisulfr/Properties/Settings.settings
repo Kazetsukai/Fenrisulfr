@@ -9,15 +9,15 @@
       <Value Profile="(Default)">400, 400</Value>
     </Setting>
     <Setting Name="ChartScaleViewMaxY770nm" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">1100</Value>
+      <Value Profile="(Default)">10000</Value>
     </Setting>
-    <Setting Name="ChartScaleViewMaxY850nm" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">1100</Value>
+    <Setting Name="ChartScaleViewMaxY940nm" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">10000</Value>
     </Setting>
     <Setting Name="ChartScaleViewMinY770nm" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="ChartScaleViewMinY850nm" Type="System.Double" Scope="User">
+    <Setting Name="ChartScaleViewMinY940nm" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="SampleRate" Type="System.Double" Scope="User">

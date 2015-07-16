@@ -143,7 +143,7 @@ namespace Fenrisulfr
             sensorValue850 = RequestSensorValue(1);
             SetLEDState(2, LEDState.Off);
 
-            _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read850 = sensorValue850, Milliseconds = _stopwatch.ElapsedMilliseconds });
+            _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read940 = sensorValue850, Milliseconds = _stopwatch.ElapsedMilliseconds });
         }
 
         int RequestSensorValue(ushort address)
@@ -196,4 +196,18 @@ namespace Fenrisulfr
             }
         }
     }
+
+#region Enums
+    public enum FnirsControllerState
+    {
+        Running,
+        Stopped
+    }
+
+    public enum LEDState
+    {
+        On,
+        Off
+    }
+#endregion
 }

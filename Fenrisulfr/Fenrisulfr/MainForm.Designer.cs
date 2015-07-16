@@ -59,6 +59,7 @@
             this.chartFFT = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.t_windowSize = new System.Windows.Forms.TextBox();
             this.l_FFTWindowSize = new System.Windows.Forms.Label();
+            this.ch_butterworthApply = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.chartData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartFFT)).BeginInit();
             this.SuspendLayout();
@@ -107,7 +108,7 @@
             chartArea1.AxisX.ScaleView.MinSize = 10D;
             chartArea1.AxisX.ScaleView.MinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
             chartArea1.AxisX.ScaleView.SizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
-            chartArea1.AxisY.Maximum = 1100D;
+            chartArea1.AxisY.Maximum = 100000D;
             chartArea1.AxisY.Minimum = 0D;
             chartArea1.AxisY.ScaleView.MinSize = 10D;
             chartArea1.AxisY.ScaleView.SmallScrollMinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
@@ -117,13 +118,13 @@
             chartArea1.CursorY.IsUserSelectionEnabled = true;
             chartArea1.CursorY.LineColor = System.Drawing.Color.White;
             chartArea1.Name = "ChartArea_770";
-            chartArea2.AxisY.Maximum = 1100D;
+            chartArea2.AxisY.Maximum = 100000D;
             chartArea2.BackColor = System.Drawing.Color.Transparent;
             chartArea2.CursorX.LineColor = System.Drawing.Color.White;
             chartArea2.CursorY.IsUserEnabled = true;
             chartArea2.CursorY.IsUserSelectionEnabled = true;
             chartArea2.CursorY.LineColor = System.Drawing.Color.White;
-            chartArea2.Name = "ChartArea_850";
+            chartArea2.Name = "ChartArea_940";
             this.chartData.ChartAreas.Add(chartArea1);
             this.chartData.ChartAreas.Add(chartArea2);
             this.chartData.Location = new System.Drawing.Point(12, 51);
@@ -133,17 +134,17 @@
             series1.MarkerSize = 10;
             series1.Name = "S1_770_Raw";
             series1.Points.Add(dataPoint1);
-            series2.ChartArea = "ChartArea_850";
+            series2.ChartArea = "ChartArea_940";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series2.MarkerSize = 10;
-            series2.Name = "S1_850_Raw";
+            series2.Name = "S1_940_Raw";
             series2.Points.Add(dataPoint2);
             series3.ChartArea = "ChartArea_770";
             series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series3.Name = "S1_770_MovAvg";
             series4.ChartArea = "ChartArea_770";
             series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series4.Name = "S1_850_MovAvg";
+            series4.Name = "S1_940_MovAvg";
             this.chartData.Series.Add(series1);
             this.chartData.Series.Add(series2);
             this.chartData.Series.Add(series3);
@@ -157,10 +158,10 @@
             title1.Name = "Title1";
             title1.Text = "770nm";
             title2.Alignment = System.Drawing.ContentAlignment.TopCenter;
-            title2.DockedToChartArea = "ChartArea_850";
+            title2.DockedToChartArea = "ChartArea_940";
             title2.IsDockedInsideChartArea = false;
             title2.Name = "Title2";
-            title2.Text = "850nm";
+            title2.Text = "940nm";
             this.chartData.Titles.Add(title1);
             this.chartData.Titles.Add(title2);
             this.chartData.AxisViewChanged += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.ViewEventArgs>(this.chart_AxisViewChanged);
@@ -214,6 +215,7 @@
             this.chartFFT.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chartFFT.BackColor = System.Drawing.Color.Transparent;
+            chartArea3.AxisY.Maximum = 2000D;
             chartArea3.BackColor = System.Drawing.Color.Transparent;
             chartArea3.CursorX.Interval = 1E-05D;
             chartArea3.CursorX.IsUserEnabled = true;
@@ -229,7 +231,7 @@
             series5.Points.Add(dataPoint3);
             series6.ChartArea = "ChartArea";
             series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series6.Name = "S1_850_FFT";
+            series6.Name = "S1_940_FFT";
             series6.Points.Add(dataPoint4);
             this.chartFFT.Series.Add(series5);
             this.chartFFT.Series.Add(series6);
@@ -278,11 +280,24 @@
             this.l_FFTWindowSize.TabIndex = 16;
             this.l_FFTWindowSize.Text = "FFT Window size (samples) :";
             // 
+            // ch_butterworthApply
+            // 
+            this.ch_butterworthApply.AutoSize = true;
+            this.ch_butterworthApply.Location = new System.Drawing.Point(454, 49);
+            this.ch_butterworthApply.Name = "ch_butterworthApply";
+            this.ch_butterworthApply.Size = new System.Drawing.Size(130, 17);
+            this.ch_butterworthApply.TabIndex = 17;
+            this.ch_butterworthApply.Text = "Apply butterworth filter";
+            this.ch_butterworthApply.UseVisualStyleBackColor = true;
+            this.ch_butterworthApply.CheckedChanged += new System.EventHandler(this.ch_butterworthApply_CheckedChanged);
+            // 
             // FNIRS
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(990, 528);
+            this.Controls.Add(this.ch_butterworthApply);
             this.Controls.Add(this.l_FFTWindowSize);
             this.Controls.Add(this.t_windowSize);
             this.Controls.Add(this.chartFFT);
@@ -321,6 +336,7 @@
         private System.Windows.Forms.DataVisualization.Charting.Chart chartFFT;
         private System.Windows.Forms.TextBox t_windowSize;
         private System.Windows.Forms.Label l_FFTWindowSize;
+        private System.Windows.Forms.CheckBox ch_butterworthApply;
     }
 }
 
