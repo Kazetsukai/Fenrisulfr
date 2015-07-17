@@ -69,17 +69,10 @@ namespace Fenrisulfr
                             {
                                 Console.WriteLine("Opening serial port: " + Properties.Settings.Default.DeviceCOMPort);
                                 _serialPort.Open();
-
-                                //Clear LEDs
-                                //SetLEDState(1, LEDState.Off);
-                                //SetLEDState(2, LEDState.Off);
                             }
-
-                            while (true)
-                            {
-                                DoWork();
-                                Thread.Sleep(_samplePeriod_ms - 3); //Why 3?! Can we get rid of this delay some how? Otherwise the sample rate is wrong!
-                            }
+                           
+                            DoWork();
+                            Thread.Sleep(_samplePeriod_ms - 3); //Why 3?! Can we get rid of this delay some how? Otherwise the sample rate is wrong!                            
                         }
                         catch (Exception ex)
                         {
@@ -96,12 +89,15 @@ namespace Fenrisulfr
 
         public void Stop()
         {
-            _stopping = true;
-            
+            _stopping = true;            
             _readerThread.Wait();
-
+            _stopwatch.Stop();
+          
             _stopping = false;
             _readerThread = null;
+
+            SetLEDState(1, LEDState.Off);
+            SetLEDState(2, LEDState.Off);  
 
             Console.WriteLine("Closing serial port: " + Properties.Settings.Default.DeviceCOMPort);
             _serialPort.Close();
@@ -139,10 +135,8 @@ namespace Fenrisulfr
             SetLEDState(2, LEDState.On);
 
             sensorValue770 = RequestSensorValue(0);
-            sensorValue940 = RequestSensorValue(1);     
-                       
-            //SetLEDState(1, LEDState.Off);
-            //SetLEDState(2, LEDState.Off);
+            sensorValue940 = RequestSensorValue(1);                         
+           
 
             _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read940 = sensorValue940, Milliseconds = _stopwatch.ElapsedMilliseconds });
         }
