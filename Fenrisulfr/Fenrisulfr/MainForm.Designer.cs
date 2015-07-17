@@ -215,12 +215,16 @@
             this.chartFFT.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chartFFT.BackColor = System.Drawing.Color.Transparent;
+            chartArea3.AxisX.ScrollBar.Size = 18D;
+            chartArea3.AxisX2.ScrollBar.Size = 18D;
             chartArea3.AxisY.Maximum = 2000D;
             chartArea3.BackColor = System.Drawing.Color.Transparent;
             chartArea3.CursorX.Interval = 1E-05D;
             chartArea3.CursorX.IsUserEnabled = true;
             chartArea3.CursorX.IsUserSelectionEnabled = true;
             chartArea3.CursorX.LineColor = System.Drawing.Color.White;
+            chartArea3.CursorY.IsUserEnabled = true;
+            chartArea3.CursorY.IsUserSelectionEnabled = true;
             chartArea3.Name = "ChartArea";
             this.chartFFT.ChartAreas.Add(chartArea3);
             this.chartFFT.Location = new System.Drawing.Point(280, 95);

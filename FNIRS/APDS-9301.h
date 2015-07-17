@@ -25,10 +25,11 @@
 #define SENSOR_REG_DATA1LOW			0x0E		//Low byte of ADC channel 1
 #define SENSOR_REG_DATA1HIGH		0x0F		//High byte of ADC channel 1
 
+#define SENSOR_WORD					0x20
 
-#define SENSOR_ADC_INTEG_TIME_14ms	0x00
-#define SENSOR_ADC_INTEG_TIME_101ms	0x01
-#define SENSOR_ADC_INTEG_TIME_402ms	0x10
+#define SENSOR_ADC_INTEG_TIME_14ms	0x00		//ADC scales to 0.034
+#define SENSOR_ADC_INTEG_TIME_101ms	0x01		//ADC scales to 0.252
+#define SENSOR_ADC_INTEG_TIME_402ms	0x10		//ADC scales to 1
 
 extern void SensorInit();
 
@@ -38,11 +39,18 @@ extern uint8_t SensorCommsAreWorking();
 extern void WriteSensorRegister(uint8_t address, uint8_t data);
 extern uint8_t ReadSensorRegister(uint8_t address);
 
-extern uint16_t GetSensorValue(uint8_t channel);
+extern uint16_t GetSensorData(uint8_t channel);
 
 extern void SetSensorGain_1();
 extern void SetSensorGain_16();
 
 extern void SetSensorADCIntegTime(uint8_t SENSOR_ADC_INTEG_TIME);
+
+extern void StartSensorADC();
+extern void StopSensorADC();
+
+extern void RestartADC();
+
+extern uint16_t ReadSensorDATA0();
 
 #endif /* APDS_9301_H_ */

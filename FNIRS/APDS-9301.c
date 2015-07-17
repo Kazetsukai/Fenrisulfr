@@ -7,6 +7,8 @@
 
 #include "APDS-9301.h"
 
+uint16_t INTEG_TIME = 0;
+
 void SensorInit()
 {
 	SoftI2CMasterInit();
@@ -57,20 +59,48 @@ uint8_t ReadSensorRegister(uint8_t address)
 	return value;
 }
 
-uint16_t GetSensorValue(uint8_t channel)
+uint16_t ReadSensorDATA0()
+{
+	uint16_t value = 0;
+
+	SoftI2CMasterInit();
+	SoftI2CMasterStart(SENSOR_ADDR | I2C_WRITE);								//Start condition with WRITE
+	SoftI2CMasterWrite(SENSOR_REG_COMMAND | SENSOR_WORD | SENSOR_REG_DATA0LOW);	//Command code with address of register
+	SoftI2CMasterRestart(SENSOR_ADDR | I2C_READ);								//Restart condition with READ
+	value = SoftI2cMasterRead(0);												//Read LOW data. Master will reply with ACK
+	value |= SoftI2cMasterRead(1) << 8;											//Read HIGH data. Master will reply with ACK
+	SoftI2cMasterStop();														//Stop condition
+	SoftI2CMasterDeInit();
+
+	return value;
+}
+
+uint16_t ReadSensorDATA1()
+{
+	uint16_t value = 0;
+
+	SoftI2CMasterInit();
+	SoftI2CMasterStart(SENSOR_ADDR | I2C_WRITE);								//Start condition with WRITE
+	SoftI2CMasterWrite(SENSOR_REG_COMMAND | SENSOR_WORD | SENSOR_REG_DATA1LOW);	//Command code with address of register
+	SoftI2CMasterRestart(SENSOR_ADDR | I2C_READ);								//Restart condition with READ
+	value = SoftI2cMasterRead(0);												//Read LOW data. Master will reply with ACK
+	value |= SoftI2cMasterRead(1) << 8;											//Read HIGH data. Master will reply with ACK
+	SoftI2cMasterStop();														//Stop condition
+	SoftI2CMasterDeInit();
+
+	return value;
+}
+
+uint16_t GetSensorData(uint8_t channel)
 {
 	if (channel == 0)
 	{
-		uint16_t data = ReadSensorRegister(SENSOR_REG_DATA0LOW);
-		data |= (ReadSensorRegister(SENSOR_REG_DATA0HIGH) << 8);
-		return data;
+		return ReadSensorDATA0();
 	}
 
 	else if (channel == 1)
 	{
-		uint16_t data = ReadSensorRegister(SENSOR_REG_DATA1LOW);
-		data |= (ReadSensorRegister(SENSOR_REG_DATA1HIGH) << 8);
-		return data;
+		return ReadSensorDATA1();
 	}
 	else
 	{
@@ -104,5 +134,36 @@ void SetSensorADCIntegTime(uint8_t SENSOR_ADC_INTEG_TIME)
 	//Set sensor gain to 16x
 	WriteSensorRegister(SENSOR_REG_TIMING, regContents & SENSOR_ADC_INTEG_TIME);	//Set ADC integration time
 }
+
+void StartSensorADC()
+{
+	//Get register contents to preserve other values
+	uint8_t regContents = ReadSensorRegister(SENSOR_REG_TIMING);
+
+	//We are using manual timing. Need to set the bits in TIMING register. (Done one after other just in case there are problems with MANUAL being set to 1 before INTEG is set to 11)
+	WriteSensorRegister(SENSOR_REG_TIMING, regContents | 0x03);	//set INTEG bits to 11
+	WriteSensorRegister(SENSOR_REG_TIMING, regContents | 0x08);	//set MANUAL bit to 1
+}
+
+void StopSensorADC()
+{
+	//Get register contents to preserve other values
+	uint8_t regContents = ReadSensorRegister(SENSOR_REG_TIMING);
+	WriteSensorRegister(SENSOR_REG_TIMING, regContents & 0xF7);	//set MANUAL bit to 0
+}
+
+void RestartADC()
+{
+	//Get register contents to preserve other values
+	uint8_t regContents = ReadSensorRegister(SENSOR_REG_TIMING);
+	WriteSensorRegister(SENSOR_REG_TIMING, regContents & 0xF7);	//set MANUAL bit to 0
+}
+
+
+
+
+
+
+
 
 

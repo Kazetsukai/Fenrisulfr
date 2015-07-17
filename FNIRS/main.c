@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <math.h>
 #include <util/delay.h>
 #include <stdlib.h>
 #include "usart.h"
@@ -12,18 +13,20 @@
 #define toggle(port, pin) (port ^= _BV(pin))
 
 //Define ports and pins
-#define LED_PORT			PORTB
 #define LED_PCB				PB5
-
-#define SENSOR_PORT			PORTC
-#define SENSOR				PC0
 #define LED940				PC5
 #define LED770				PC4
+#define DEBUG0				PC0
+#define DEBUG1				PC1
 
 //Define constants
 #define UART_BAUD_RATE		2000000
 
-uint16_t sensorValue850;
+volatile uint16_t timerElapsed_ms;
+volatile uint16_t integTime_ms;
+volatile uint8_t ADC_DONE = 0;
+
+uint16_t sensorValue940;
 uint16_t sensorValue770;
 
 uint16_t sensor_read()
@@ -33,25 +36,17 @@ uint16_t sensor_read()
 	return ADC;
 }
 
-uint8_t SINETEST_index = 0;
-uint16_t SINETEST[] = { 500,598,691,778,854,916,962,990,
-		1000,990,962,916,854,778,691,598,
-		500,402,309,222,146,84,38,10,
-		0,10,38,84,146,222,309,402};
-
-
 void Setup()
 {
-	//Set inputs
-	DDRC &= ~(_BV(SENSOR));
-
 	//Set outputs
 	DDRB |= _BV(LED_PCB);
-	DDRC |= _BV(LED770) | _BV(LED940);
+	DDRC |= _BV(LED770) | _BV(LED940) | _BV(DEBUG0)| _BV(DEBUG1);
 
-	//Initialize ADC
-	ADMUX |=  _BV(REFS1) | _BV(REFS0);									//Select Vref=Vcc (1.1V), channel = sensor pin (PC0)
-	ADCSRA |= _BV(ADPS2) | _BV(ADPS1) | _BV(ADPS0) | _BV(ADEN); 						//Set prescaler to 32 and enable ADC (allows sample to be taken in < 1ms)
+	//Initialize timer for counting ADC integration time
+	TCNT1 = 0;									//Set initial timer value
+	TCCR1B |= _BV(CS10);						//Start timer with prescale clkI/O / 32
+	OCR1A = 15960;								//Tuned to 1ms compmatch interrupt
+	TIMSK1 |= _BV(OCIE1A);						//Start timer1 interrupt on compmatch with OCR1A (counts every ms)
 
 	//Initialize UART
 	usart_init(USART_BAUD_SELECT_DOUBLE_SPEED(UART_BAUD_RATE,F_CPU));
@@ -62,6 +57,67 @@ void Setup()
 	sei();
 }
 
+uint16_t GetSensorReadingManual(uint8_t channel, double INTEG_SCALE)
+{
+	//Determine the time for ADC integration slope. 402ms yields scale = 1
+	integTime_ms = INTEG_SCALE * 402;
+
+	//Reset timer
+	ADC_DONE = 0;
+	timerElapsed_ms = 0;
+	TCNT1 = 0;
+
+	//We are manually setting the integration time of the sensor ADC
+	StartSensorADC();
+	while (!ADC_DONE){}	//Wait until timer reaches specified time
+	StopSensorADC();
+
+	return GetSensorData(channel);
+}
+
+uint16_t GetSensorReadingAuto(uint8_t channel, uint8_t SCALE_OPTION)
+{
+	SetSensorADCIntegTime(SCALE_OPTION);
+	return GetSensorData(channel);
+}
+
+/*
+double GetLuxReading(uint8_t SCALE_OPTION)
+{
+	double lux = 0;
+
+	//Info taken from datasheet (page 4) to calculate lux for this sensor. Relies on data from both ADC channels
+	uint16_t channel0Value = GetSensorReadingAuto(0, SCALE_OPTION);
+	uint16_t channel1Value = GetSensorReadingAuto(1, SCALE_OPTION);
+
+	double channelRatio = channel1Value / channel0Value;
+
+	if (channelRatio <= 0.50)
+	{
+		lux = (0.0304 * channel0Value) - (0.062 *  channel0Value * pow(channelRatio, 1.4));
+	}
+
+	else if  (channelRatio <= 0.61)
+	{
+		lux = (0.0224 * channel0Value) - (0.031 *  channel1Value);
+	}
+
+	else if  (channelRatio <= 0.80)
+	{
+		lux = (0.0128 * channel0Value) - (0.0153 *  channel1Value);
+	}
+	else if  (channelRatio <= 1.30)
+	{
+		lux = (0.00146 * channel0Value) - (0.00112 *  channel1Value);
+	}
+	else if  (channelRatio > 1.30)
+	{
+		lux = 0;
+	}
+
+	return lux;
+}
+*/
 
 void SetLEDState(uint8_t LEDState, uint8_t LEDAddress)
 {
@@ -110,10 +166,27 @@ int main(void)
 	}
 
 	SetSensorGain_16();
-	SetSensorADCIntegTime(SENSOR_ADC_INTEG_TIME_402ms);
 
 	while(1)
 	{
+		/*
+		//baud rate is changed remember!!!!!!!!
+		usart_puts("0,");
+
+		//set(PORTC, LED770);
+		sensorValue770 = GetSensorReadingAuto(0, SENSOR_ADC_INTEG_TIME_402ms);
+		//clr(PORTC, LED770);
+		usart_puts(utoa(sensorValue770, 6, 10));
+		usart_puts(",");
+
+		//set(PORTC, LED940);
+		sensorValue940 = GetSensorReadingAuto(1,SENSOR_ADC_INTEG_TIME_402ms);
+		//clr(PORTC, LED940);
+		usart_puts(utoa(sensorValue940, 6, 10));
+		usart_puts("\n\r");
+
+*/
+
 		//Wait for instruction from PC
 		uint8_t nextByte = usart_receive();
 
@@ -141,23 +214,16 @@ int main(void)
 			uint16_t sensorAddress = (usart_receive() << 8);
 			sensorAddress |= usart_receive();
 
-			uint16_t sensorValue = GetSensorValue(0);
-
-			/*
-			SINETEST_index+= 8;
-			if (SINETEST_index >= 32)
-			{
-				SINETEST_index = 0;
-			}
-			*/
+			uint16_t sensorValue = GetSensorReadingAuto(sensorAddress, SENSOR_ADC_INTEG_TIME_402ms);
 
 			//Send the data to PC
 			usart_send(CMD_SENSORREAD);
 			usart_send(sensorValue >> 8);
-			usart_send((uint8_t)sensorValue);
+			usart_send(sensorValue);
 		}
 
-		/*//Not working yet
+		/*
+		//Not working yet
 		else if (nextByte == CMD_ADCCONFIG)
 		{
 			//Extract ADC config from next byte
@@ -175,33 +241,21 @@ int main(void)
 }
 
 
-/*//Old sensor
-uint16_t GetSensorValue(uint16_t address)
+
+ISR(TIMER1_COMPA_vect)
 {
-	if (address == 1)
+	TCNT1 = 0;
+	timerElapsed_ms++;
+
+	//Set flag when ADC integration time is reached
+	if ((timerElapsed_ms >= integTime_ms) && (!ADC_DONE))
 	{
-		return sensor_read();
+		clr(PORTC, DEBUG0);
+		ADC_DONE = 1;
+
 	}
-	return 0;
+
+	toggle(PORTC, DEBUG1);
 }
 
-void SetADCConfig(uint8_t prescaler, uint8_t vref)
-{
-	//Set prescaler
-	prescaler &= 0x07;		//Prevent 'prescaler' overwriting other bits in register
-	ADCSRA &= (0x18);		//Clear prescaler bits
-	ADCSRA |= prescaler;	//Apply prescaler bits
 
-	//Set Vref
-	if (vref == 1)
-	{
-		//Set ADC Vref to 5.0V
-		ADMUX &= ~(_BV(REFS1) | _BV(REFS0));
-	}
-	else
-	{
-		//Set ADC Vref to 1.1V
-		ADMUX |= _BV(REFS1) | _BV(REFS0);
-	}
-}
-*/

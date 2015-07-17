@@ -354,6 +354,6 @@ namespace Fenrisulfr
         private void ch_butterworthApply_CheckedChanged(object sender, EventArgs e)
         {
             _useButterworth = ch_butterworthApply.Checked;
-        }
+        }               
     }
 }

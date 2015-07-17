@@ -28,7 +28,7 @@ namespace Fenrisulfr
         private int _samplePeriod_ms = 100;
 
         int sensorValue770;
-        int sensorValue850;
+        int sensorValue940;
 
         public void SetSampleRate(double SampleRateHz)
         {
@@ -71,8 +71,8 @@ namespace Fenrisulfr
                                 _serialPort.Open();
 
                                 //Clear LEDs
-                                SetLEDState(1, LEDState.Off);
-                                SetLEDState(2, LEDState.Off);
+                                //SetLEDState(1, LEDState.Off);
+                                //SetLEDState(2, LEDState.Off);
                             }
 
                             while (true)
@@ -136,14 +136,15 @@ namespace Fenrisulfr
         {
             //Flash leds and get data
             SetLEDState(1, LEDState.On);
-            sensorValue770 = RequestSensorValue(1);
-            SetLEDState(1, LEDState.Off);
-
             SetLEDState(2, LEDState.On);
-            sensorValue850 = RequestSensorValue(1);
-            SetLEDState(2, LEDState.Off);
 
-            _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read940 = sensorValue850, Milliseconds = _stopwatch.ElapsedMilliseconds });
+            sensorValue770 = RequestSensorValue(0);
+            sensorValue940 = RequestSensorValue(1);     
+                       
+            //SetLEDState(1, LEDState.Off);
+            //SetLEDState(2, LEDState.Off);
+
+            _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read940 = sensorValue940, Milliseconds = _stopwatch.ElapsedMilliseconds });
         }
 
         int RequestSensorValue(ushort address)
@@ -161,6 +162,7 @@ namespace Fenrisulfr
 
             //Read value out
             _serialPort.Read(ReturnData, 0, 3);
+            Console.WriteLine(BitConverter.ToString(ReturnData));
 
             return (ReturnData[1] << 8) + (ReturnData[2]);
         }
