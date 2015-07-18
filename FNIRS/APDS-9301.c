@@ -7,7 +7,7 @@
 
 #include "APDS-9301.h"
 
-uint16_t INTEG_TIME = 0;
+uint8_t SENSOR_GAIN = 16;
 
 void SensorInit()
 {
@@ -115,6 +115,8 @@ void SetSensorGain_1()
 
 	//Set sensor gain to 1x
 	WriteSensorRegister(SENSOR_REG_TIMING, regContents & ~_BV(4));	//Set GAIN bit to 0
+
+	SENSOR_GAIN = 1;
 }
 
 void SetSensorGain_16()
@@ -124,6 +126,8 @@ void SetSensorGain_16()
 
 	//Set sensor gain to 16x
 	WriteSensorRegister(SENSOR_REG_TIMING, regContents | _BV(4));	//Set GAIN bit to 1
+
+	SENSOR_GAIN = 16;
 }
 
 void SetSensorADCIntegTime(uint8_t SENSOR_ADC_INTEG_TIME)
@@ -137,26 +141,34 @@ void SetSensorADCIntegTime(uint8_t SENSOR_ADC_INTEG_TIME)
 
 void StartSensorADC()
 {
-	//Get register contents to preserve other values
-	uint8_t regContents = ReadSensorRegister(SENSOR_REG_TIMING);
+	uint8_t regContents = 0x03;
+
+	if (SENSOR_GAIN == 16)
+	{
+		regContents |= 0x10;
+	}
 
 	//We are using manual timing. Need to set the bits in TIMING register. (Done one after other just in case there are problems with MANUAL being set to 1 before INTEG is set to 11)
-	WriteSensorRegister(SENSOR_REG_TIMING, regContents | 0x03);	//set INTEG bits to 11
-	WriteSensorRegister(SENSOR_REG_TIMING, regContents | 0x08);	//set MANUAL bit to 1
+	WriteSensorRegister(SENSOR_REG_TIMING, regContents | 0x08);		//set MANUAL bit to 1 to begin new conversion
 }
 
 void StopSensorADC()
 {
-	//Get register contents to preserve other values
-	uint8_t regContents = ReadSensorRegister(SENSOR_REG_TIMING);
-	WriteSensorRegister(SENSOR_REG_TIMING, regContents & 0xF7);	//set MANUAL bit to 0
+	//Clear the timing register, but leave in manual mode
+	WriteSensorRegister(SENSOR_REG_TIMING, 0x03);	//set MANUAL bit to 0
 }
 
-void RestartADC()
+void SetADCManualMode()
 {
-	//Get register contents to preserve other values
-	uint8_t regContents = ReadSensorRegister(SENSOR_REG_TIMING);
-	WriteSensorRegister(SENSOR_REG_TIMING, regContents & 0xF7);	//set MANUAL bit to 0
+	//set INTEG bits to 11, MANUAL bit to 0
+	uint8_t regContents = 0x03;
+
+	if (SENSOR_GAIN == 16)
+	{
+		regContents |= 0x10;
+	}
+
+	WriteSensorRegister(SENSOR_REG_TIMING, regContents);
 }
 
 

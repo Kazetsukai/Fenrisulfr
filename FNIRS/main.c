@@ -24,10 +24,10 @@
 
 volatile uint16_t timerElapsed_ms;
 volatile uint16_t integTime_ms;
-volatile uint8_t ADC_DONE = 0;
 
 uint16_t sensorValue940;
 uint16_t sensorValue770;
+
 
 uint16_t sensor_read()
 {
@@ -57,27 +57,8 @@ void Setup()
 	sei();
 }
 
-uint16_t GetSensorReadingManual(uint8_t channel, double INTEG_SCALE)
+uint16_t GetSensorReadingAuto(uint8_t channel)
 {
-	//Determine the time for ADC integration slope. 402ms yields scale = 1
-	integTime_ms = INTEG_SCALE * 402;
-
-	//Reset timer
-	ADC_DONE = 0;
-	timerElapsed_ms = 0;
-	TCNT1 = 0;
-
-	//We are manually setting the integration time of the sensor ADC
-	StartSensorADC();
-	while (!ADC_DONE){}	//Wait until timer reaches specified time
-	StopSensorADC();
-
-	return GetSensorData(channel);
-}
-
-uint16_t GetSensorReadingAuto(uint8_t channel, uint8_t SCALE_OPTION)
-{
-	SetSensorADCIntegTime(SCALE_OPTION);
 	return GetSensorData(channel);
 }
 
@@ -123,22 +104,22 @@ void SetLEDState(uint8_t LEDState, uint8_t LEDAddress)
 {
 	if (LEDState == 1)
 	{
-		if (LEDAddress == 1)
+		if (LEDAddress == 0)
 		{
 			set(PORTC, LED770);
 		}
-		if (LEDAddress == 2)
+		if (LEDAddress == 1)
 		{
 			set(PORTC, LED940);
 		}
 	}
 	if (LEDState == 0)
 	{
-		if (LEDAddress == 1)
+		if (LEDAddress == 0)
 		{
 			clr(PORTC, LED770);
 		}
-		if (LEDAddress == 2)
+		if (LEDAddress == 1)
 		{
 			clr(PORTC, LED940);
 		}
@@ -166,6 +147,7 @@ int main(void)
 	}
 
 	SetSensorGain_16();
+	integTime_ms = 40;
 
 	while(1)
 	{
@@ -211,10 +193,12 @@ int main(void)
 		else if (nextByte == CMD_SENSORREAD)
 		{
 			//Extract sensor address from next bytes
-			uint16_t sensorAddress = (usart_receive() << 8);
-			sensorAddress |= usart_receive();
+			uint16_t channel = (usart_receive() << 8);
+			channel |= usart_receive();
 
-			uint16_t sensorValue = GetSensorReadingAuto(sensorAddress, SENSOR_ADC_INTEG_TIME_402ms);
+
+
+			uint16_t sensorValue = GetSensorData(channel);
 
 			//Send the data to PC
 			usart_send(CMD_SENSORREAD);
@@ -247,15 +231,14 @@ ISR(TIMER1_COMPA_vect)
 	TCNT1 = 0;
 	timerElapsed_ms++;
 
-	//Set flag when ADC integration time is reached
-	if ((timerElapsed_ms >= integTime_ms) && (!ADC_DONE))
+	//Restart ADC when conversion time is reached
+	if (timerElapsed_ms >= integTime_ms)
 	{
-		clr(PORTC, DEBUG0);
-		ADC_DONE = 1;
+		StopSensorADC();
+		StartSensorADC();
 
+		timerElapsed_ms = 0;
 	}
-
-	toggle(PORTC, DEBUG1);
 }
 
 

@@ -31,6 +31,7 @@
 #define SENSOR_ADC_INTEG_TIME_101ms	0x01		//ADC scales to 0.252
 #define SENSOR_ADC_INTEG_TIME_402ms	0x10		//ADC scales to 1
 
+
 extern void SensorInit();
 
 extern void SensorPowerUp();
@@ -52,5 +53,5 @@ extern void StopSensorADC();
 extern void RestartADC();
 
 extern uint16_t ReadSensorDATA0();
-
+extern void SetADCManualMode();
 #endif /* APDS_9301_H_ */

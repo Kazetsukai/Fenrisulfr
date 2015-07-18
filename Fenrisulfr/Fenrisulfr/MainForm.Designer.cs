@@ -233,10 +233,12 @@
             this.chartFFT.BackColor = System.Drawing.Color.Transparent;
             chartArea3.AxisX.MajorGrid.Interval = 1D;
             chartArea3.AxisX.MinorGrid.Enabled = true;
-            chartArea3.AxisX.MinorGrid.Interval = 0.5D;
+            chartArea3.AxisX.MinorGrid.Interval = 0.1D;
+            chartArea3.AxisX.MinorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dash;
             chartArea3.AxisX.MinorTickMark.Enabled = true;
-            chartArea3.AxisX.MinorTickMark.Interval = 0.5D;
+            chartArea3.AxisX.MinorTickMark.Interval = 0.1D;
             chartArea3.AxisX.ScrollBar.Size = 18D;
+            chartArea3.AxisX2.MinorGrid.Enabled = true;
             chartArea3.AxisX2.ScrollBar.Size = 18D;
             chartArea3.AxisY.Maximum = 2000D;
             chartArea3.AxisY.Minimum = 0D;

@@ -65,7 +65,7 @@ namespace Fenrisulfr
             {
                 _readerThread = Task.Run(() =>
                 {
-                    _stopwatch.Start();
+                    _stopwatch.Start();  
 
                     while (!_stopping)
                     {
@@ -74,7 +74,7 @@ namespace Fenrisulfr
                             if (!_serialPort.IsOpen)
                             {
                                 Console.WriteLine("Opening serial port: " + Properties.Settings.Default.DeviceCOMPort);
-                                _serialPort.Open();
+                                _serialPort.Open();                                
                             }
                            
                             DoWork();
@@ -137,12 +137,16 @@ namespace Fenrisulfr
         void DoWork()
         {
             //Flash leds and get data
-            SetLEDState(1, LEDState.On);
-            SetLEDState(2, LEDState.On);
-
-            sensorValue770 = RequestSensorValue(0);
-            sensorValue940 = RequestSensorValue(1);                         
            
+            //SetLEDState(0, LEDState.On);         
+            sensorValue770 = RequestSensorValue(0);            
+            //SetLEDState(0, LEDState.Off);       
+            
+            
+            SetLEDState(1, LEDState.On);        
+            sensorValue940 = RequestSensorValue(1);
+            //SetLEDState(1, LEDState.Off);
+                      
             _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read940 = sensorValue940, Milliseconds = _stopwatch.ElapsedMilliseconds });
         }
 
