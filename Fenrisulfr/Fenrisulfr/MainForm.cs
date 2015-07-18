@@ -1,4 +1,5 @@
-﻿using MathNet.Numerics.Transformations;
+﻿using MathNet.Numerics;
+using MathNet.Numerics.Transformations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,7 +23,11 @@ namespace Fenrisulfr
         private DateTime _traceStart;
         
         int _chartWidth = 10000;
-        bool _useButterworth;
+        bool _drawFFT770 = true;
+        bool _drawFFT940 = true;
+        bool _fitPolyReg_770;
+        bool _fitPolyReg_940;
+        int _polyRegOrder = 16;
 
         public FNIRS()
         {
@@ -87,10 +92,11 @@ namespace Fenrisulfr
             }
         }
 
-        private List<DataPoint> GetSeriesFFT(List<DataPoint> discreteData, int windowSize, double sampleRate)
+        private void GetSeriesFFT(List<DataPoint> discreteData, int windowSize, double sampleRate, out double[] xValues, out double[] yValues)
         {
             //Populate data
-            double[] dataIn = new double[windowSize];
+            double[] dataIn = new double[windowSize];                      
+
             for(int i = 0; i < discreteData.Count; i++)
             {
                 dataIn[i] = discreteData[i].YValues[0];
@@ -104,16 +110,20 @@ namespace Fenrisulfr
             RealFourierTransformation rft = new RealFourierTransformation();
             rft.TransformForward(dataIn, out freqReal, out freqImag);
 
-            List<DataPoint> dataOut = new List<DataPoint>(windowSize / 2);      
+            xValues = new double[windowSize / 2];
+            yValues = new double[windowSize / 2];
 
             //We only take first half of data (windowSize = half of freqReal[] size)
             for (int i = 0; i < windowSize / 2; i++)
             {
-                double magnitude = Math.Sqrt((freqReal[i] * freqReal[i]) + (freqImag[i] * freqImag[i]));                
-                dataOut.Add(new DataPoint(i * freqBinWidth / 2, magnitude));
+                double magnitude = Math.Sqrt((freqReal[i] * freqReal[i]) + (freqImag[i] * freqImag[i]));  
+                double freq = i * freqBinWidth / 2;
+                
+                xValues[i] = freq;
+                yValues[i] = magnitude;
+
                 //Console.WriteLine(freqReal[i] + "\t" + freqImag[i]);
             }           
-            return dataOut;
         }
 
         private void b_StartStop_Click(object sender, EventArgs e)
@@ -136,7 +146,26 @@ namespace Fenrisulfr
                 {
                     MessageBox.Show("FFT window size must be a power of 2! (e.g, 32, 64, 128, etc)");
                     return;
+                }                             
+
+                //Check polynomial order is valid
+                try
+                {
+                    int order;
+                    int.TryParse(t_polyRegOrder.Text, out order);
+
+                    if (order >= Properties.Settings.Default.FFTWindowSize / 2)
+                    {
+                        MessageBox.Show("Polynomial regression order must be a number less than half of the FFT window size.");                        
+                        return;
+                    }
+                    _polyRegOrder = order;
                 }
+                catch
+                {
+                    MessageBox.Show("Polynomial regression order must be a number less than half of the FFT window size.");                  
+                    return;
+                }                    
 
                 _traceStart = DateTime.Now;
                 b_StartStop.Text = "Stop";
@@ -178,6 +207,26 @@ namespace Fenrisulfr
                 });
             }
         }
+
+        /// <summary>
+        /// Generates line of best fit from data list using linear least squares algorithm.
+        /// </summary>
+        /// <param name="points"></param>
+        /// <returns>List of DataPoint objects.</returns>
+        public static List<DataPoint> GenerateLinearBestFit(List<DataPoint> points)
+        {
+            int numPoints = points.Count;
+            double meanX = points.Average(point => point.XValue);
+            double meanY = points.Average(point => point.YValues[0]);
+
+            double sumXSquared = points.Sum(point => point.XValue * point.XValue);
+            double sumXY = points.Sum(point => point.XValue * point.YValues[0]);
+
+            double a = (sumXY / numPoints - meanX * meanY) / (sumXSquared / numPoints - meanX * meanX);
+            double b = (a * meanX - meanY);
+
+            return points.Select(point => new DataPoint(point.XValue, a * point.XValue - b)).ToList();
+        }
         
         private void UI_UpdateTimer_Tick(object sender, EventArgs e)
         {
@@ -202,36 +251,52 @@ namespace Fenrisulfr
                 
                 //Update FFT chart                
                 if (chartData.Series["S1_770_Raw"].Points.Count > Properties.Settings.Default.FFTWindowSize)
-                {
+                {              
                     List<DataPoint> fftWindowData = new List<DataPoint>();
                 
                     //Populate list of data to perform FFT on
                     for (int i = 0; i < Properties.Settings.Default.FFTWindowSize; i++)
                     {
                         fftWindowData.Add(chartData.Series["S1_770_Raw"].Points[(chartData.Series["S1_770_Raw"].Points.Count - 1) - (Properties.Settings.Default.FFTWindowSize - i)]);
-                    }
-
-                    chartFFT.Series["S1_770_FFT"].Points.Clear();
+                    }                 
 
                     //Apply FFT to the data
-                    List<DataPoint> fftData770 = GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate());
+                    double[] fftData770X = new double[Properties.Settings.Default.FFTWindowSize / 2];
+                    double[] fftData770Y = new double[Properties.Settings.Default.FFTWindowSize / 2];
 
-                    //Apply butterworth filter
-                    if (_useButterworth)
+                    GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate(), out fftData770X, out fftData770Y);
+
+                    //Clear the chart
+                    chartFFT.Series["S1_770_FFT"].Points.Clear();
+                    chartFFT.Series["S1_770_BestFitLine"].Points.Clear();
+
+                    //Draw the data on the chart
+                    if (_drawFFT770)
                     {
-                        ButterworthFilter(fftData770, Properties.Settings.Default.SampleRate, 3, 20, 30);
+                        for (int i = 0; i < Properties.Settings.Default.FFTWindowSize / 2; i++)
+                        {
+                            chartFFT.Series["S1_770_FFT"].Points.Add(new DataPoint(fftData770X[i], fftData770Y[i]));
+                        }
                     }
 
-                    /*
-                    foreach (DataPoint point in fftData770)
+                    //Draw best fit line
+                    if (_fitPolyReg_770)
                     {
+                        //Calculate polynomial constants for regression line
+                        double[] polynomialConstants = Fit.Polynomial(fftData770X, fftData770Y, _polyRegOrder);
                         
-                    }    */               
-                
-                    //Draw the data on the chart
-                    foreach (DataPoint point in fftData770)
-                    {
-                        chartFFT.Series["S1_770_FFT"].Points.Add(point);
+                        //Draw the line of best fit on chart
+                        for (int i = 0; i < Properties.Settings.Default.FFTWindowSize / 2; i++)
+                        {
+                            double y = 0;
+
+                            for (int j = 0; j < polynomialConstants.Length; j++)
+                            {
+                                y += polynomialConstants[j] * Math.Pow(fftData770X[i], j);
+                            }                          
+
+                            chartFFT.Series["S1_770_BestFitLine"].Points.Add(new DataPoint(fftData770X[i], y));
+                        }
                     }
                 }
 
@@ -243,13 +308,44 @@ namespace Fenrisulfr
                     {
                         fftWindowData.Add(chartData.Series["S1_940_Raw"].Points[(chartData.Series["S1_940_Raw"].Points.Count - 1) - (Properties.Settings.Default.FFTWindowSize - i)]);
                     }
+                    
+                    //Apply FFT to the data
+                    double[] fftData940X = new double[Properties.Settings.Default.FFTWindowSize / 2];
+                    double[] fftData940Y = new double[Properties.Settings.Default.FFTWindowSize / 2];
 
-                    List<DataPoint> fftData940 = GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate());
+                    GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate(), out fftData940X, out fftData940Y);
+                    
+                    //Clear the chart
                     chartFFT.Series["S1_940_FFT"].Points.Clear();
+                    chartFFT.Series["S1_940_BestFitLine"].Points.Clear();
 
-                    foreach (DataPoint point in fftData940)
+                    //Draw the data on the chart
+                    if (_drawFFT940)
                     {
-                        chartFFT.Series["S1_940_FFT"].Points.Add(point);
+                        for (int i = 0; i < Properties.Settings.Default.FFTWindowSize / 2; i++)
+                        {
+                            chartFFT.Series["S1_940_FFT"].Points.Add(new DataPoint(fftData940X[i], fftData940Y[i]));
+                        }
+                    }
+                    
+                    //Draw best fit line
+                    if (_fitPolyReg_940)
+                    {
+                        //Calculate polynomial constants for regression line
+                        double[] polynomialConstants = Fit.Polynomial(fftData940X, fftData940Y, _polyRegOrder);
+                        
+                        //Draw the line of best fit on chart
+                        for (int i = 0; i < Properties.Settings.Default.FFTWindowSize / 2; i++)
+                        {
+                            double y = 0;
+
+                            for (int j = 0; j < polynomialConstants.Length; j++)
+                            {
+                                y += polynomialConstants[j] * Math.Pow(fftData940X[i], j);
+                            }                          
+
+                            chartFFT.Series["S1_940_BestFitLine"].Points.Add(new DataPoint(fftData940X[i], y));
+                        }
                     }
                 }
             }         
@@ -257,14 +353,14 @@ namespace Fenrisulfr
             // Only let people save if there are samples to save
             if (_trace.Count == 0)
             {
-                btnSaveTrace.Enabled = false;
-                lblSamples.Text = "(Waiting for samples)";
+                b_SaveTrace.Enabled = false;
+                l_samples.Text = "(Waiting for samples)";
             }
             else
             {
-                btnSaveTrace.Enabled = true;
+                b_SaveTrace.Enabled = true;
                 var milliseconds = (_trace[_trace.Count - 1].Milliseconds - _trace[0].Milliseconds);
-                lblSamples.Text = _trace.Count + " samples collected - " + milliseconds + " milliseconds of data";
+                l_samples.Text = _trace.Count + " samples collected - " + milliseconds + " milliseconds of data";
             }
         }
 
@@ -351,9 +447,81 @@ namespace Fenrisulfr
             }
         }
 
-        private void ch_butterworthApply_CheckedChanged(object sender, EventArgs e)
+     
+        private void b_reset_Click(object sender, EventArgs e)
         {
-            _useButterworth = ch_butterworthApply.Checked;
-        }               
+            //Reset timers and counters
+            _trace = new List<SensorResult>();
+            _controller.Reset();
+            b_SaveTrace.Enabled = false;
+
+            //Clear the charts
+            ClearChartData();
+            ClearChartFFT();
+        }
+
+        void ClearChartData()
+        {
+            for (int i = 0; i < chartData.Series.Count; i++)
+            {
+                chartData.Series[i].Points.Clear();
+                chartData.Series[i].Points.Add(new DataPoint(0, 0));
+            }
+        }
+
+        void ClearChartFFT()
+        {
+            for (int i = 0; i < chartFFT.Series.Count; i++)
+            {
+                chartFFT.Series[i].Points.Clear();
+                chartFFT.Series[i].Points.Add(new DataPoint(0, 0));
+            }
+        }
+
+        private void ch_drawFFT770_CheckedChanged(object sender, EventArgs e)
+        {
+            _drawFFT770 = ch_drawFFT770.Checked;
+        }
+
+        private void ch_drawFFT940_CheckedChanged(object sender, EventArgs e)
+        {
+            _drawFFT940 = ch_drawFFT940.Checked;
+        }  
+
+        private void ch_bestFitLine770_CheckedChanged(object sender, EventArgs e)
+        {
+            _fitPolyReg_770 = ch_FitPolyReg770.Checked;
+        }
+
+        private void ch_FitPolyReg940_CheckedChanged(object sender, EventArgs e)
+        {
+            _fitPolyReg_940 = ch_FitPolyReg940.Checked;
+        }
+
+        private void t_polyRegOrder_TextChanged(object sender, EventArgs e)
+        {
+            //Check polynomial order is valid
+            try
+            {
+                int order;
+                int.TryParse(t_polyRegOrder.Text, out order);
+
+                if (order >= Properties.Settings.Default.FFTWindowSize / 2)
+                {
+                    MessageBox.Show("Polynomial regression order must be a number less than half of the FFT window size.");
+                    t_polyRegOrder.Text = "16";
+                    _polyRegOrder = 16;
+                    return;
+                }
+                _polyRegOrder = order;
+            }
+            catch
+            {
+                MessageBox.Show("Polynomial regression order must be a number less than half of the FFT window size.");
+                t_polyRegOrder.Text = "16";
+                _polyRegOrder = 16;
+                return;
+            }       
+        }                  
     }
 }

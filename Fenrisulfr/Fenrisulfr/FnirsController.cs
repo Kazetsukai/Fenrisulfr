@@ -30,6 +30,12 @@ namespace Fenrisulfr
         int sensorValue770;
         int sensorValue940;
 
+        public void Reset()
+        {
+            _stopwatch.Reset();
+            _results = new ConcurrentQueue<SensorResult>();
+        }
+
         public void SetSampleRate(double SampleRateHz)
         {
             _samplePeriod_ms = (int)(1000 / SampleRateHz);
@@ -137,7 +143,6 @@ namespace Fenrisulfr
             sensorValue770 = RequestSensorValue(0);
             sensorValue940 = RequestSensorValue(1);                         
            
-
             _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read940 = sensorValue940, Milliseconds = _stopwatch.ElapsedMilliseconds });
         }
 
