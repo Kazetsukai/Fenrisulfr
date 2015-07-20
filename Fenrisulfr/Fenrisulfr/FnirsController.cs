@@ -74,7 +74,10 @@ namespace Fenrisulfr
                             if (!_serialPort.IsOpen)
                             {
                                 Console.WriteLine("Opening serial port: " + Properties.Settings.Default.DeviceCOMPort);
-                                _serialPort.Open();                                
+                                _serialPort.Open();
+
+                                SetLEDState(0, LEDState.Off);
+                                SetLEDState(1, LEDState.Off);
                             }
                            
                             DoWork();
@@ -143,8 +146,8 @@ namespace Fenrisulfr
             //SetLEDState(0, LEDState.Off);       
             
             
-            SetLEDState(1, LEDState.On);        
-            sensorValue940 = RequestSensorValue(1);
+            //SetLEDState(1, LEDState.On);        
+            //sensorValue940 = RequestSensorValue(1);
             //SetLEDState(1, LEDState.Off);
                       
             _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read940 = sensorValue940, Milliseconds = _stopwatch.ElapsedMilliseconds });
@@ -167,6 +170,10 @@ namespace Fenrisulfr
             _serialPort.Read(ReturnData, 0, 3);
             Console.WriteLine(BitConverter.ToString(ReturnData));
 
+            if (ReturnData[0] != 0x53)
+            {
+                throw new Exception();
+            }
             return (ReturnData[1] << 8) + (ReturnData[2]);
         }
 

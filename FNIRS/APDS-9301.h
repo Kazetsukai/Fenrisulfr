@@ -8,7 +8,7 @@
 #ifndef APDS_9301_H_
 #define APDS_9301_H_
 
-#include "softi2c.h"
+#include "i2csoft.h"
 
 #define SENSOR_ADDR 				0x52		//Shifted 1 bit to account for R/W bit
 #define SENSOR_REG_COMMAND			0x80		//Specifies register address

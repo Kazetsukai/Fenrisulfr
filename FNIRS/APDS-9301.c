@@ -11,7 +11,28 @@ uint8_t SENSOR_GAIN = 16;
 
 void SensorInit()
 {
-	SoftI2CMasterInit();
+	SoftI2CInit();
+}
+
+void WriteSensorRegister(uint8_t address, uint8_t data)
+{
+	SoftI2CStart();											//Start
+	SoftI2CWriteByte(SENSOR_ADDR);							//Slave address with WRITE
+	SoftI2CWriteByte(SENSOR_REG_COMMAND |  address);		//Command code with address of register
+	SoftI2CWriteByte(data);									//Write data to specified register
+	SoftI2CStop();											//Stop condition
+}
+
+uint8_t ReadSensorRegister(uint8_t address)
+{
+	SoftI2CStart();											//Start
+	SoftI2CWriteByte(SENSOR_ADDR);							//Slave address with WRITE
+	SoftI2CWriteByte(SENSOR_REG_COMMAND |  address);		//Command code with address of register
+	SoftI2CRepeatedStart();												//Restart
+	SoftI2CWriteByte(SENSOR_ADDR | 0x01);					//Slave address with READ
+	uint8_t value = SoftI2CReadByte(1);						//Read 1 byte to get data. Master will reply with ACK
+	SoftI2CStop();											//Stop condition
+	return value;
 }
 
 void SensorPowerUp()
@@ -24,7 +45,7 @@ uint8_t SensorCommsAreWorking()
 	//Power up the sensor. Can be used to confirm device is communicating properly if READ is done after power up and the value is 0x03.
 	SensorPowerUp();
 
-	if ((ReadSensorRegister(SENSOR_REG_CONTROL) & 0x03) == 0x03)
+	if (ReadSensorRegister(SENSOR_REG_CONTROL) == 0x03)
 	{
 		return 1;
 	}
@@ -34,60 +55,29 @@ uint8_t SensorCommsAreWorking()
 	}
 }
 
-void WriteSensorRegister(uint8_t address, uint8_t data)
-{
-	SoftI2CMasterInit();
-	SoftI2CMasterStart(SENSOR_ADDR | I2C_WRITE);				//Start condition with WRITE
-	SoftI2CMasterWrite(SENSOR_REG_COMMAND |  address);			//Command code with address of register
-	SoftI2CMasterWrite(data);									//Write data to specified register
-	SoftI2cMasterStop();										//Stop condition
-	SoftI2CMasterDeInit();
-}
-
-uint8_t ReadSensorRegister(uint8_t address)
-{
-	uint8_t value = 0;
-
-	SoftI2CMasterInit();
-	SoftI2CMasterStart(SENSOR_ADDR | I2C_WRITE);				//Start condition with WRITE
-	SoftI2CMasterWrite(SENSOR_REG_COMMAND |  address);			//Command code with address of register
-	SoftI2CMasterRestart(SENSOR_ADDR | I2C_READ);				//Restart condition with READ
-	value = SoftI2cMasterRead(1);								//Read 1 byte to get data. Master will reply with ACK
-	SoftI2cMasterStop();										//Stop condition
-	SoftI2CMasterDeInit();
-
-	return value;
-}
-
 uint16_t ReadSensorDATA0()
 {
-	uint16_t value = 0;
-
-	SoftI2CMasterInit();
-	SoftI2CMasterStart(SENSOR_ADDR | I2C_WRITE);								//Start condition with WRITE
-	SoftI2CMasterWrite(SENSOR_REG_COMMAND | SENSOR_WORD | SENSOR_REG_DATA0LOW);	//Command code with address of register
-	SoftI2CMasterRestart(SENSOR_ADDR | I2C_READ);								//Restart condition with READ
-	value = SoftI2cMasterRead(0);												//Read LOW data. Master will reply with ACK
-	value |= SoftI2cMasterRead(1) << 8;											//Read HIGH data. Master will reply with ACK
-	SoftI2cMasterStop();														//Stop condition
-	SoftI2CMasterDeInit();
-
+	SoftI2CStart();																//Start
+	SoftI2CWriteByte(SENSOR_ADDR);												//Slave address with WRITE
+	SoftI2CWriteByte(SENSOR_REG_COMMAND | SENSOR_WORD | SENSOR_REG_DATA0LOW);	//Command code with address of register
+	SoftI2CStart();														//Restart
+	SoftI2CWriteByte(SENSOR_ADDR | 0x01);										//Slave address with READ
+	uint16_t value = SoftI2CReadByte(1);										//Read LOW data. Master will reply with ACK
+	value |= SoftI2CReadByte(1) << 8;											//Read HIGH data. Master will reply with ACK
+	SoftI2CStop();																//Stop condition
 	return value;
 }
 
 uint16_t ReadSensorDATA1()
 {
-	uint16_t value = 0;
-
-	SoftI2CMasterInit();
-	SoftI2CMasterStart(SENSOR_ADDR | I2C_WRITE);								//Start condition with WRITE
-	SoftI2CMasterWrite(SENSOR_REG_COMMAND | SENSOR_WORD | SENSOR_REG_DATA1LOW);	//Command code with address of register
-	SoftI2CMasterRestart(SENSOR_ADDR | I2C_READ);								//Restart condition with READ
-	value = SoftI2cMasterRead(0);												//Read LOW data. Master will reply with ACK
-	value |= SoftI2cMasterRead(1) << 8;											//Read HIGH data. Master will reply with ACK
-	SoftI2cMasterStop();														//Stop condition
-	SoftI2CMasterDeInit();
-
+	SoftI2CStart();																//Start
+	SoftI2CWriteByte(SENSOR_ADDR);												//Slave address with WRITE
+	SoftI2CWriteByte(SENSOR_REG_COMMAND | SENSOR_WORD | SENSOR_REG_DATA1LOW);	//Command code with address of register
+	SoftI2CStart();														//Restart
+	SoftI2CWriteByte(SENSOR_ADDR | 0x01);										//Slave address with READ
+	uint16_t value = SoftI2CReadByte(1);										//Read LOW data. Master will reply with ACK
+	value |= SoftI2CReadByte(1) << 8;											//Read HIGH data. Master will reply with ACK
+	SoftI2CStop();																//Stop condition
 	return value;
 }
 

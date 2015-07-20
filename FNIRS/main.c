@@ -27,7 +27,7 @@ volatile uint16_t integTime_ms;
 
 uint16_t sensorValue940;
 uint16_t sensorValue770;
-
+volatile uint16_t sensorValue;
 
 uint16_t sensor_read()
 {
@@ -51,7 +51,6 @@ void Setup()
 	//Initialize UART
 	usart_init(USART_BAUD_SELECT_DOUBLE_SPEED(UART_BAUD_RATE,F_CPU));
 
-	//Initialize sensor
 	SensorInit();
 
 	sei();
@@ -135,6 +134,7 @@ int main(void)
 	//Initialize MCU
 	Setup();
 
+
 	if (SensorCommsAreWorking())
 	{
 		for (int i = 0; i < 3; i++)
@@ -147,6 +147,7 @@ int main(void)
 	}
 
 	SetSensorGain_16();
+	SetSensorADCIntegTime(SENSOR_ADC_INTEG_TIME_402ms);
 	integTime_ms = 40;
 
 	while(1)
@@ -168,7 +169,6 @@ int main(void)
 		usart_puts("\n\r");
 
 */
-
 		//Wait for instruction from PC
 		uint8_t nextByte = usart_receive();
 
@@ -196,9 +196,7 @@ int main(void)
 			uint16_t channel = (usart_receive() << 8);
 			channel |= usart_receive();
 
-
-
-			uint16_t sensorValue = GetSensorData(channel);
+			sensorValue = GetSensorData(channel);
 
 			//Send the data to PC
 			usart_send(CMD_SENSORREAD);
@@ -227,7 +225,7 @@ int main(void)
 
 
 ISR(TIMER1_COMPA_vect)
-{
+{/*
 	TCNT1 = 0;
 	timerElapsed_ms++;
 
@@ -238,7 +236,7 @@ ISR(TIMER1_COMPA_vect)
 		StartSensorADC();
 
 		timerElapsed_ms = 0;
-	}
+	}*/
 }
 
 
