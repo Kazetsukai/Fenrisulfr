@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
-#include <math.h>
+
 #include <util/delay.h>
 #include <stdlib.h>
 #include "usart.h"
@@ -56,49 +56,6 @@ void Setup()
 	sei();
 }
 
-uint16_t GetSensorReadingAuto(uint8_t channel)
-{
-	return GetSensorData(channel);
-}
-
-/*
-double GetLuxReading(uint8_t SCALE_OPTION)
-{
-	double lux = 0;
-
-	//Info taken from datasheet (page 4) to calculate lux for this sensor. Relies on data from both ADC channels
-	uint16_t channel0Value = GetSensorReadingAuto(0, SCALE_OPTION);
-	uint16_t channel1Value = GetSensorReadingAuto(1, SCALE_OPTION);
-
-	double channelRatio = channel1Value / channel0Value;
-
-	if (channelRatio <= 0.50)
-	{
-		lux = (0.0304 * channel0Value) - (0.062 *  channel0Value * pow(channelRatio, 1.4));
-	}
-
-	else if  (channelRatio <= 0.61)
-	{
-		lux = (0.0224 * channel0Value) - (0.031 *  channel1Value);
-	}
-
-	else if  (channelRatio <= 0.80)
-	{
-		lux = (0.0128 * channel0Value) - (0.0153 *  channel1Value);
-	}
-	else if  (channelRatio <= 1.30)
-	{
-		lux = (0.00146 * channel0Value) - (0.00112 *  channel1Value);
-	}
-	else if  (channelRatio > 1.30)
-	{
-		lux = 0;
-	}
-
-	return lux;
-}
-*/
-
 void SetLEDState(uint8_t LEDState, uint8_t LEDAddress)
 {
 	if (LEDState == 1)
@@ -129,11 +86,17 @@ void SetLEDState(uint8_t LEDState, uint8_t LEDAddress)
 #define CMD_SENSORREAD		0x53
 #define CMD_ADCCONFIG		0x41
 
+void RestartIntegTimer()
+{
+	StopSensorADC();
+	StartSensorADC();
+	timerElapsed_ms = 0;
+}
+
 int main(void)
 {
 	//Initialize MCU
 	Setup();
-
 
 	if (SensorCommsAreWorking())
 	{
@@ -147,28 +110,28 @@ int main(void)
 	}
 
 	SetSensorGain_16();
-	SetSensorADCIntegTime(SENSOR_ADC_INTEG_TIME_402ms);
-	integTime_ms = 40;
+	//SetSensorADCIntegTime(SENSOR_ADC_INTEG_TIME_402ms);
+
+	SetADCManualMode();
+	integTime_ms = 2;
 
 	while(1)
 	{
 		/*
-		//baud rate is changed remember!!!!!!!!
-		usart_puts("0,");
+		while (1)
+		{
+			//baud rate is changed remember!!!!!!!!
+			usart_puts("0,");
 
-		//set(PORTC, LED770);
-		sensorValue770 = GetSensorReadingAuto(0, SENSOR_ADC_INTEG_TIME_402ms);
-		//clr(PORTC, LED770);
-		usart_puts(utoa(sensorValue770, 6, 10));
-		usart_puts(",");
+			sensorValue770 = GetSensorData(0);
+			usart_puts(utoa(sensorValue770, 6, 10));
+			usart_puts(",");
 
-		//set(PORTC, LED940);
-		sensorValue940 = GetSensorReadingAuto(1,SENSOR_ADC_INTEG_TIME_402ms);
-		//clr(PORTC, LED940);
-		usart_puts(utoa(sensorValue940, 6, 10));
-		usart_puts("\n\r");
+			sensorValue940 = GetSensorData(1);
+			usart_puts(utoa(sensorValue940, 6, 10));
+			usart_puts("\n\r");
+		}*/
 
-*/
 		//Wait for instruction from PC
 		uint8_t nextByte = usart_receive();
 
@@ -185,6 +148,7 @@ int main(void)
 
 			//Apply the new state to the specified LED
 			SetLEDState(LEDState, LEDAddress);
+			RestartIntegTimer();	//Restart ADC
 
 			//Send acknowledgement to PC
 			usart_send(CMD_LEDSTATE);
@@ -223,20 +187,16 @@ int main(void)
 }
 
 
-
 ISR(TIMER1_COMPA_vect)
-{/*
+{
 	TCNT1 = 0;
 	timerElapsed_ms++;
 
 	//Restart ADC when conversion time is reached
 	if (timerElapsed_ms >= integTime_ms)
 	{
-		StopSensorADC();
-		StartSensorADC();
-
-		timerElapsed_ms = 0;
-	}*/
+		RestartIntegTimer();
+	}
 }
 
 

@@ -64,6 +64,8 @@
             this.ch_FitPolyReg770 = new System.Windows.Forms.CheckBox();
             this.b_reset = new System.Windows.Forms.Button();
             this.p_options = new System.Windows.Forms.Panel();
+            this.c_ledOn940 = new System.Windows.Forms.CheckBox();
+            this.c_ledOn770 = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
             this.t_polyRegOrder = new System.Windows.Forms.TextBox();
             this.ch_drawFFT940 = new System.Windows.Forms.CheckBox();
@@ -185,7 +187,7 @@
             // l_samples
             // 
             this.l_samples.AutoSize = true;
-            this.l_samples.Location = new System.Drawing.Point(7, 170);
+            this.l_samples.Location = new System.Drawing.Point(4, 351);
             this.l_samples.Name = "l_samples";
             this.l_samples.Size = new System.Drawing.Size(105, 13);
             this.l_samples.TabIndex = 10;
@@ -326,7 +328,7 @@
             // ch_FitPolyReg770
             // 
             this.ch_FitPolyReg770.AutoSize = true;
-            this.ch_FitPolyReg770.Location = new System.Drawing.Point(7, 284);
+            this.ch_FitPolyReg770.Location = new System.Drawing.Point(4, 465);
             this.ch_FitPolyReg770.Name = "ch_FitPolyReg770";
             this.ch_FitPolyReg770.Size = new System.Drawing.Size(151, 17);
             this.ch_FitPolyReg770.TabIndex = 17;
@@ -349,6 +351,8 @@
             this.p_options.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.p_options.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.p_options.Controls.Add(this.c_ledOn940);
+            this.p_options.Controls.Add(this.c_ledOn770);
             this.p_options.Controls.Add(this.label2);
             this.p_options.Controls.Add(this.t_polyRegOrder);
             this.p_options.Controls.Add(this.ch_drawFFT940);
@@ -370,10 +374,36 @@
             this.p_options.Size = new System.Drawing.Size(234, 599);
             this.p_options.TabIndex = 19;
             // 
+            // c_ledOn940
+            // 
+            this.c_ledOn940.AutoSize = true;
+            this.c_ledOn940.Checked = true;
+            this.c_ledOn940.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.c_ledOn940.Location = new System.Drawing.Point(4, 195);
+            this.c_ledOn940.Name = "c_ledOn940";
+            this.c_ledOn940.Size = new System.Drawing.Size(102, 17);
+            this.c_ledOn940.TabIndex = 25;
+            this.c_ledOn940.Text = "940 nm LED On";
+            this.c_ledOn940.UseVisualStyleBackColor = true;
+            this.c_ledOn940.CheckedChanged += new System.EventHandler(this.c_ledOn940_CheckedChanged);
+            // 
+            // c_ledOn770
+            // 
+            this.c_ledOn770.AutoSize = true;
+            this.c_ledOn770.Checked = true;
+            this.c_ledOn770.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.c_ledOn770.Location = new System.Drawing.Point(4, 172);
+            this.c_ledOn770.Name = "c_ledOn770";
+            this.c_ledOn770.Size = new System.Drawing.Size(102, 17);
+            this.c_ledOn770.TabIndex = 24;
+            this.c_ledOn770.Text = "770 nm LED On";
+            this.c_ledOn770.UseVisualStyleBackColor = true;
+            this.c_ledOn770.CheckedChanged += new System.EventHandler(this.c_ledOn770_CheckedChanged);
+            // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(4, 261);
+            this.label2.Location = new System.Drawing.Point(1, 442);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(108, 13);
             this.label2.TabIndex = 23;
@@ -383,7 +413,7 @@
             // 
             this.t_polyRegOrder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.t_polyRegOrder.Location = new System.Drawing.Point(128, 258);
+            this.t_polyRegOrder.Location = new System.Drawing.Point(125, 439);
             this.t_polyRegOrder.Name = "t_polyRegOrder";
             this.t_polyRegOrder.Size = new System.Drawing.Size(83, 20);
             this.t_polyRegOrder.TabIndex = 22;
@@ -395,7 +425,7 @@
             this.ch_drawFFT940.AutoSize = true;
             this.ch_drawFFT940.Checked = true;
             this.ch_drawFFT940.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.ch_drawFFT940.Location = new System.Drawing.Point(7, 222);
+            this.ch_drawFFT940.Location = new System.Drawing.Point(4, 403);
             this.ch_drawFFT940.Name = "ch_drawFFT940";
             this.ch_drawFFT940.Size = new System.Drawing.Size(117, 17);
             this.ch_drawFFT940.TabIndex = 21;
@@ -408,7 +438,7 @@
             this.ch_drawFFT770.AutoSize = true;
             this.ch_drawFFT770.Checked = true;
             this.ch_drawFFT770.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.ch_drawFFT770.Location = new System.Drawing.Point(7, 199);
+            this.ch_drawFFT770.Location = new System.Drawing.Point(4, 380);
             this.ch_drawFFT770.Name = "ch_drawFFT770";
             this.ch_drawFFT770.Size = new System.Drawing.Size(117, 17);
             this.ch_drawFFT770.TabIndex = 20;
@@ -419,7 +449,7 @@
             // ch_FitPolyReg940
             // 
             this.ch_FitPolyReg940.AutoSize = true;
-            this.ch_FitPolyReg940.Location = new System.Drawing.Point(7, 307);
+            this.ch_FitPolyReg940.Location = new System.Drawing.Point(4, 488);
             this.ch_FitPolyReg940.Name = "ch_FitPolyReg940";
             this.ch_FitPolyReg940.Size = new System.Drawing.Size(151, 17);
             this.ch_FitPolyReg940.TabIndex = 19;
@@ -458,6 +488,7 @@
             this.MinimumSize = new System.Drawing.Size(1300, 560);
             this.Name = "FNIRS";
             this.Text = "Fenrisulfr";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FNIRS_FormClosing);
             this.Load += new System.EventHandler(this.FNIRS_Load);
             this.ResizeEnd += new System.EventHandler(this.FNIRS_ResizeEnd);
             ((System.ComponentModel.ISupportInitialize)(this.chartData)).EndInit();
@@ -496,6 +527,8 @@
         private System.Windows.Forms.CheckBox ch_drawFFT940;
         private System.Windows.Forms.TextBox t_polyRegOrder;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox c_ledOn940;
+        private System.Windows.Forms.CheckBox c_ledOn770;
     }
 }
 

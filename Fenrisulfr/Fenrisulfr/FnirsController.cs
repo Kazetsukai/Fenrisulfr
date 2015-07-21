@@ -27,6 +27,8 @@ namespace Fenrisulfr
 
         private int _samplePeriod_ms = 100;
 
+        private bool _serialPortBusy = false;
+
         int sensorValue770;
         int sensorValue940;
 
@@ -74,10 +76,7 @@ namespace Fenrisulfr
                             if (!_serialPort.IsOpen)
                             {
                                 Console.WriteLine("Opening serial port: " + Properties.Settings.Default.DeviceCOMPort);
-                                _serialPort.Open();
-
-                                SetLEDState(0, LEDState.Off);
-                                SetLEDState(1, LEDState.Off);
+                                _serialPort.Open();  
                             }
                            
                             DoWork();
@@ -105,8 +104,8 @@ namespace Fenrisulfr
             _stopping = false;
             _readerThread = null;
 
-            SetLEDState(1, LEDState.Off);
-            SetLEDState(2, LEDState.Off);  
+            SetLEDState(0, LEDState.Off);
+            SetLEDState(1, LEDState.Off);  
 
             Console.WriteLine("Closing serial port: " + Properties.Settings.Default.DeviceCOMPort);
             _serialPort.Close();
@@ -137,37 +136,55 @@ namespace Fenrisulfr
             throw new ComputerSaysNoException("This is ridiculous, if you aren't going to give me a value then I am outta here. Screw you.");
         }
 
+        int delay = 10;
         void DoWork()
         {
-            //Flash leds and get data
-           
-            //SetLEDState(0, LEDState.On);         
+
+            //Get sensor data
+            SetLEDState(0, LEDState.On);
+            Thread.Sleep(delay);
             sensorValue770 = RequestSensorValue(0);            
-            //SetLEDState(0, LEDState.Off);       
-            
-            
-            //SetLEDState(1, LEDState.On);        
-            //sensorValue940 = RequestSensorValue(1);
-            //SetLEDState(1, LEDState.Off);
+            SetLEDState(0, LEDState.Off);
+            Thread.Sleep(delay);
+
+            SetLEDState(1, LEDState.On);
+            Thread.Sleep(delay);
+            sensorValue940 = RequestSensorValue(1);
+            SetLEDState(1, LEDState.Off);
+            Thread.Sleep(delay);
                       
             _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read940 = sensorValue940, Milliseconds = _stopwatch.ElapsedMilliseconds });
         }
 
         int RequestSensorValue(ushort address)
         {
+            if (!_serialPort.IsOpen)
+            {
+                return 0;
+            }
+
+            //Wait until serial port isn't being used (prevents conflicts with LED switching requests)
+            while (_serialPortBusy) { }
+            _serialPortBusy = true;
+
             //Clear serial port in buffer
             _serialPort.DiscardInBuffer();
 
             //Prepare command packet
+            RequestValueCommandPacket[0] = 0x53;
             RequestValueCommandPacket[1] = (byte)(address >> 7);
             RequestValueCommandPacket[2] = (byte) address;
 
-            //Send the packet to device
-            _serialPort.DiscardInBuffer();
+            //Send the packet to device        
             _serialPort.Write(RequestValueCommandPacket, 0, 3);
 
-            //Read value out
-            _serialPort.Read(ReturnData, 0, 3);
+            //Read value out            
+            ReturnData[0] = (byte)_serialPort.ReadByte();
+            ReturnData[1] = (byte)_serialPort.ReadByte();
+            ReturnData[2] = (byte)_serialPort.ReadByte();
+
+            _serialPortBusy = false;
+
             Console.WriteLine(BitConverter.ToString(ReturnData));
 
             if (ReturnData[0] != 0x53)
@@ -177,11 +194,13 @@ namespace Fenrisulfr
             return (ReturnData[1] << 8) + (ReturnData[2]);
         }
 
-        void SetLEDState(ushort address, LEDState state)
-        {
-            //Clear serial port in buffer
-            _serialPort.DiscardInBuffer();
-
+        public void SetLEDState(ushort address, LEDState state)
+        {            
+            if (!_serialPort.IsOpen)
+            {
+                return;
+            }
+            
             SetLEDCommandPacket[0] = 0x4C;
             SetLEDCommandPacket[1] = 0;
             SetLEDCommandPacket[2] = 0; 
@@ -196,12 +215,19 @@ namespace Fenrisulfr
             SetLEDCommandPacket[1] |= (byte)(address >> 7);
             SetLEDCommandPacket[2] |= (byte)address;
 
+            //Wait until serial port isn't being used (prevents conflicts with LED switching requests)
+            while (_serialPortBusy) { }
+            _serialPortBusy = true;
+
             //Send the packet to device
+            _serialPort.DiscardInBuffer();
             _serialPort.Write(SetLEDCommandPacket, 0, 3);
 
             //Get acknowledgement
             byte ack = (byte)_serialPort.ReadByte();
-            
+
+            _serialPortBusy = false;
+
             if (ack != 0x4C)
             {
                 throw new LEDStateChangeUnacknowledgedException("LED State change was requested by computer, but not acknowledged by device.");

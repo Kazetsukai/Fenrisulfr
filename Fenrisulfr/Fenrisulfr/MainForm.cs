@@ -176,6 +176,17 @@ namespace Fenrisulfr
                 _controller.SetSampleRate(sampleRate);
                 _controller.Start();
                 UI_UpdateTimer.Start();
+
+                //Turn on LEDs if required
+                if (c_ledOn770.Checked)
+                {
+                    _controller.SetLEDState(0, LEDState.On);                  
+                }
+                if (c_ledOn940.Checked)
+                {
+                    _controller.SetLEDState(1, LEDState.On);
+                }
+
             }
             else if (_controller.GetState() == FnirsControllerState.Running)
             {
@@ -522,6 +533,35 @@ namespace Fenrisulfr
                 _polyRegOrder = 16;
                 return;
             }       
-        }                  
+        }
+
+        private void FNIRS_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            _controller.Stop(); 
+        }
+
+        private void c_ledOn770_CheckedChanged(object sender, EventArgs e)
+        {
+            if (c_ledOn770.Checked)
+            {
+                _controller.SetLEDState(0, LEDState.On);  
+            }
+            else
+            {
+                _controller.SetLEDState(0, LEDState.Off);  
+            }
+        }
+
+        private void c_ledOn940_CheckedChanged(object sender, EventArgs e)
+        {
+            if (c_ledOn940.Checked)
+            {
+                _controller.SetLEDState(1, LEDState.On);
+            }
+            else
+            {
+                _controller.SetLEDState(1, LEDState.Off);
+            }
+        }                                
     }
 }

@@ -8,6 +8,7 @@
 #ifndef APDS_9301_H_
 #define APDS_9301_H_
 
+#include <math.h>
 #include "i2csoft.h"
 
 #define SENSOR_ADDR 				0x52		//Shifted 1 bit to account for R/W bit
@@ -37,7 +38,7 @@ extern void SensorInit();
 extern void SensorPowerUp();
 extern uint8_t SensorCommsAreWorking();
 
-extern void WriteSensorRegister(uint8_t address, uint8_t data);
+extern uint8_t WriteSensorRegister(uint8_t address, uint8_t data);
 extern uint8_t ReadSensorRegister(uint8_t address);
 
 extern uint16_t GetSensorData(uint8_t channel);
@@ -54,4 +55,7 @@ extern void RestartADC();
 
 extern uint16_t ReadSensorDATA0();
 extern void SetADCManualMode();
+
+extern double GetLuxReading();
+
 #endif /* APDS_9301_H_ */
