@@ -136,7 +136,7 @@ int main(void)
 	//SetADCManualMode();
 	//integTime_ms = 2;
 	SetLEDState(1, 0);
-	//SetLEDState(1, 1);
+	SetLEDState(1, 1);
 
 	while(1)
 	{
@@ -192,7 +192,7 @@ int main(void)
 
 		else if (nextByte == CMD_READ_Ee770)
 		{
-			irrad770 += 0.1;//GetIrradiance770();
+			irrad770 = GetIrradiance770();
 
 			//Send the data to PC
 			usart_send(CMD_READ_Ee770);		//Send command back

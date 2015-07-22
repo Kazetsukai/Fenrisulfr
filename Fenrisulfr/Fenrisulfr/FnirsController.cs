@@ -171,7 +171,8 @@ namespace Fenrisulfr
         {
             //Get sensor data
             sensorValue770 = RequestSensorIrradiance770(); //RequestSensorChannelValue(0);    
-            //sensorValue940 = RequestSensorIrradiance940(); //RequestSensorChannelValue(1);
+            sensorValue940 = RequestSensorIrradiance940(); //RequestSensorChannelValue(1);
+            Thread.Sleep(10);
 
             //Console.WriteLine("770: " + sensorValue770.ToString());
             //Console.WriteLine("940: " + sensorValue940.ToString());
@@ -254,7 +255,7 @@ namespace Fenrisulfr
             {
                 throw new Exception();
             }
-            
+                        
             return BitConverter.ToSingle(data, 1);
         }
 
