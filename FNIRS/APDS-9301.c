@@ -83,6 +83,7 @@ uint16_t ReadSensorDATA1()
 	return value;
 }
 
+
 uint16_t GetSensorData(uint8_t channel)
 {
 	if (channel == 0)
@@ -162,6 +163,8 @@ void SetADCManualMode()
 	WriteSensorRegister(SENSOR_REG_TIMING, regContents);
 }
 
+
+/*
 double GetLuxReading()
 {
 	double lux = 0;
@@ -197,7 +200,7 @@ double GetLuxReading()
 
 	return lux;
 }
-
+*/
 
 
 

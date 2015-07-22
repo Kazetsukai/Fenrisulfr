@@ -28,6 +28,8 @@ volatile uint16_t integTime_ms;
 uint16_t sensorValue940;
 uint16_t sensorValue770;
 volatile uint16_t sensorValue;
+volatile float irrad770;
+volatile float irrad940;
 
 uint16_t sensor_read()
 {
@@ -83,7 +85,9 @@ void SetLEDState(uint8_t LEDState, uint8_t LEDAddress)
 }
 
 #define CMD_LEDSTATE		0x4C
-#define CMD_SENSORREAD		0x53
+#define CMD_READ_CH			0x53
+#define CMD_READ_Ee770		0x64
+#define CMD_READ_Ee940		0x65
 #define CMD_ADCCONFIG		0x41
 
 void RestartIntegTimer()
@@ -91,6 +95,23 @@ void RestartIntegTimer()
 	StopSensorADC();
 	StartSensorADC();
 	timerElapsed_ms = 0;
+}
+
+//This code will be run on the master mcu
+float GetIrradiance770()
+{
+	uint16_t ch0 = GetSensorData(0);
+	uint16_t ch1 = GetSensorData(1);
+
+	return (0.06879 * ch0) + (0.09426 * ch1);
+}
+
+float GetIrradiance940()
+{
+	uint16_t ch0 = GetSensorData(0);
+	uint16_t ch1 = GetSensorData(1);
+
+	return (0.11464 * ch0) - (0.02242 * ch1);
 }
 
 int main(void)
@@ -110,10 +131,12 @@ int main(void)
 	}
 
 	SetSensorGain_16();
-	//SetSensorADCIntegTime(SENSOR_ADC_INTEG_TIME_402ms);
+	SetSensorADCIntegTime(SENSOR_ADC_INTEG_TIME_402ms);
 
-	SetADCManualMode();
-	integTime_ms = 2;
+	//SetADCManualMode();
+	//integTime_ms = 2;
+	SetLEDState(1, 0);
+	//SetLEDState(1, 1);
 
 	while(1)
 	{
@@ -154,18 +177,35 @@ int main(void)
 			usart_send(CMD_LEDSTATE);
 		}
 
-		else if (nextByte == CMD_SENSORREAD)
+		else if (nextByte == CMD_READ_CH)
 		{
 			//Extract sensor address from next bytes
 			uint16_t channel = (usart_receive() << 8);
 			channel |= usart_receive();
 
-			sensorValue = GetSensorData(channel);
+			uint16_t data = GetSensorData(channel);
+
+			usart_send(data >> 8);
+			usart_send(data);
+
+		}
+
+		else if (nextByte == CMD_READ_Ee770)
+		{
+			irrad770 += 0.1;//GetIrradiance770();
 
 			//Send the data to PC
-			usart_send(CMD_SENSORREAD);
-			usart_send(sensorValue >> 8);
-			usart_send(sensorValue);
+			usart_send(CMD_READ_Ee770);		//Send command back
+			usart_send_f((char*)&irrad770);
+
+		}
+		else if (nextByte == CMD_READ_Ee940)
+		{
+			irrad940 = GetIrradiance940();
+
+			//Send the data to PC
+			usart_send(CMD_READ_Ee940);		//Send command back
+			usart_send_f((char*)&irrad940);
 		}
 
 		/*
@@ -189,6 +229,7 @@ int main(void)
 
 ISR(TIMER1_COMPA_vect)
 {
+	/*
 	TCNT1 = 0;
 	timerElapsed_ms++;
 
@@ -196,7 +237,7 @@ ISR(TIMER1_COMPA_vect)
 	if (timerElapsed_ms >= integTime_ms)
 	{
 		RestartIntegTimer();
-	}
+	}*/
 }
 
 

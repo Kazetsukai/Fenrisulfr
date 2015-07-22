@@ -14,6 +14,7 @@
 extern void usart_init(unsigned int baudrate);
 extern uint8_t usart_receive();
 extern void usart_send(uint8_t data);
+extern void usart_send_f(char *address);
 extern void usart_puts(char* StringPtr);
 
 #endif /* USART_H_ */

@@ -180,11 +180,11 @@ namespace Fenrisulfr
                 //Turn on LEDs if required
                 if (c_ledOn770.Checked)
                 {
-                    _controller.SetLEDState(0, LEDState.On);                  
+                    //_controller.SetSensorLEDState(0, LEDState.On);                  
                 }
                 if (c_ledOn940.Checked)
                 {
-                    _controller.SetLEDState(1, LEDState.On);
+                    //_controller.SetSensorLEDState(1, LEDState.On);
                 }
 
             }
@@ -251,8 +251,8 @@ namespace Fenrisulfr
                 _trace.Add(result);
 
                 //Update data chart
-                chartData.Series["S1_770_Raw"].Points.Add(new DataPoint(result.Milliseconds, result.Read770));
-                chartData.Series["S1_940_Raw"].Points.Add(new DataPoint(result.Milliseconds, result.Read940));
+                chartData.Series["S1_770_Raw"].Points.Add(new DataPoint(result.Milliseconds, (double)result.Read770));
+                chartData.Series["S1_940_Raw"].Points.Add(new DataPoint(result.Milliseconds, (double)result.Read940));
                                 
                 chartData.ChartAreas["ChartArea_770"].AxisX.Minimum = result.Milliseconds - _chartWidth;
                 chartData.ChartAreas["ChartArea_770"].AxisX.Maximum = result.Milliseconds;
@@ -544,11 +544,11 @@ namespace Fenrisulfr
         {
             if (c_ledOn770.Checked)
             {
-                _controller.SetLEDState(0, LEDState.On);  
+                //_controller.SetSensorLEDState(0, LEDState.On);  
             }
             else
             {
-                _controller.SetLEDState(0, LEDState.Off);  
+               // _controller.SetSensorLEDState(0, LEDState.Off);  
             }
         }
 
@@ -556,11 +556,11 @@ namespace Fenrisulfr
         {
             if (c_ledOn940.Checked)
             {
-                _controller.SetLEDState(1, LEDState.On);
+                //_controller.SetSensorLEDState(1, LEDState.On);
             }
             else
             {
-                _controller.SetLEDState(1, LEDState.Off);
+               // _controller.SetSensorLEDState(1, LEDState.Off);
             }
         }                                
     }

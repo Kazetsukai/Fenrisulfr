@@ -41,6 +41,15 @@ void usart_send(uint8_t data)
 	 UDR0 = data;
 }
 
+void usart_send_f(char *address)
+{
+	//Send float by pointing directly to the byte locations in memory
+	usart_send(*address);
+	usart_send(*(address + 1));
+	usart_send(*(address + 2));
+	usart_send(*(address + 3));
+}
+
 void usart_puts(char* StringPtr)
 {
    //Here we check if there is still more chars to send, this is done checking the actual char and see if it is different from the null char

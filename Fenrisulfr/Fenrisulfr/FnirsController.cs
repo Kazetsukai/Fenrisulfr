@@ -14,9 +14,11 @@ namespace Fenrisulfr
 {
     public class FnirsController
     {
-        private readonly static byte[] RequestValueCommandPacket = { 0x53, 0x00, 0x00 };
         private readonly static byte[] SetLEDCommandPacket = { 0x4C, 0x00, 0x00 };
-        private readonly static byte[] ReturnData = new byte[3];
+        private readonly static byte[] RequestChannelValueCommandPacket = { 0x53, 0x00, 0x00 };
+        private readonly static byte[] RequestIrradiance770ValueCommandPacket = { 0x64 };
+        private readonly static byte[] RequestIrradiance940ValueCommandPacket = { 0x65 };  
+        private readonly static byte[] ReturnData = new byte[5];
 
         private SerialPort _serialPort = new SerialPort(Properties.Settings.Default.DeviceCOMPort, 2000000, Parity.Even, 8, StopBits.One);
         private ConcurrentQueue<SensorResult> _results = new ConcurrentQueue<SensorResult>();
@@ -25,12 +27,14 @@ namespace Fenrisulfr
         private bool _stopping = false;
         private FnirsControllerState _state = FnirsControllerState.Stopped;
 
+        private int timeOfLastReceive;
+
         private int _samplePeriod_ms = 100;
 
         private bool _serialPortBusy = false;
 
-        int sensorValue770;
-        int sensorValue940;
+        float sensorValue770;
+        float sensorValue940;
 
         public void Reset()
         {
@@ -63,6 +67,12 @@ namespace Fenrisulfr
             _state = FnirsControllerState.Running;
             _results = new ConcurrentQueue<SensorResult>();
 
+            if (!_serialPort.IsOpen)
+            {
+                Console.WriteLine("Opening serial port: " + Properties.Settings.Default.DeviceCOMPort);
+                _serialPort.Open();
+            }   
+
             if (_readerThread == null)
             {
                 _readerThread = Task.Run(() =>
@@ -72,15 +82,8 @@ namespace Fenrisulfr
                     while (!_stopping)
                     {
                         try
-                        {
-                            if (!_serialPort.IsOpen)
-                            {
-                                Console.WriteLine("Opening serial port: " + Properties.Settings.Default.DeviceCOMPort);
-                                _serialPort.Open();  
-                            }
-                           
-                            DoWork();
-                            Thread.Sleep(_samplePeriod_ms - 3); //Why 3?! Can we get rid of this delay some how? Otherwise the sample rate is wrong!                            
+                        {                                                   
+                            DoWork();                                                 
                         }
                         catch (Exception ex)
                         {
@@ -104,12 +107,40 @@ namespace Fenrisulfr
             _stopping = false;
             _readerThread = null;
 
-            SetLEDState(0, LEDState.Off);
-            SetLEDState(1, LEDState.Off);  
+            SetSensorLEDState(0, LEDState.Off);
+            SetSensorLEDState(1, LEDState.Off);  
 
             Console.WriteLine("Closing serial port: " + Properties.Settings.Default.DeviceCOMPort);
             _serialPort.Close();
             _state = FnirsControllerState.Stopped;
+        }
+
+        void Send(byte[] bytesToSend)
+        {
+            //Wait until serial port isn't being used (prevents conflicts with LED switching requests)
+            while (_serialPortBusy) { }
+            _serialPortBusy = true;
+            _serialPort.DiscardInBuffer();
+            _serialPort.Write(bytesToSend, 0, bytesToSend.Count());
+            _serialPortBusy = false;
+            Console.WriteLine("SENT:" + BitConverter.ToString(bytesToSend));
+        }
+        
+        byte[] Receive(int count)
+        {
+            byte[] receiveData = new byte[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                receiveData[i] = (byte)_serialPort.ReadByte();
+            }
+
+            int timeSinceLastReceive = (int)_stopwatch.ElapsedMilliseconds - timeOfLastReceive;
+            timeOfLastReceive = (int)_stopwatch.ElapsedMilliseconds;
+            Console.WriteLine("REC :" + BitConverter.ToString(receiveData) + "\t\t" + timeSinceLastReceive.ToString());
+            
+
+            return receiveData;
         }
 
         public int ResultsInQueue { get { return _results.Count; } }
@@ -135,28 +166,49 @@ namespace Fenrisulfr
             
             throw new ComputerSaysNoException("This is ridiculous, if you aren't going to give me a value then I am outta here. Screw you.");
         }
-
-        int delay = 10;
+               
         void DoWork()
         {
-
             //Get sensor data
-            SetLEDState(0, LEDState.On);
-            Thread.Sleep(delay);
-            sensorValue770 = RequestSensorValue(0);            
-            SetLEDState(0, LEDState.Off);
-            Thread.Sleep(delay);
+            sensorValue770 = RequestSensorIrradiance770(); //RequestSensorChannelValue(0);    
+            //sensorValue940 = RequestSensorIrradiance940(); //RequestSensorChannelValue(1);
 
-            SetLEDState(1, LEDState.On);
-            Thread.Sleep(delay);
-            sensorValue940 = RequestSensorValue(1);
-            SetLEDState(1, LEDState.Off);
-            Thread.Sleep(delay);
-                      
+            //Console.WriteLine("770: " + sensorValue770.ToString());
+            //Console.WriteLine("940: " + sensorValue940.ToString());
+
             _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read940 = sensorValue940, Milliseconds = _stopwatch.ElapsedMilliseconds });
         }
 
-        int RequestSensorValue(ushort address)
+        public void SetSensorLEDState(ushort address, LEDState state)
+        {
+            return;
+            SetLEDCommandPacket[0] = 0x4C;
+            SetLEDCommandPacket[1] = 0;
+            SetLEDCommandPacket[2] = 0;
+
+            //Inject state data to packet
+            if (state == LEDState.On)
+            {
+                SetLEDCommandPacket[1] = 0x80;
+            }
+
+            //Inject address of specified LED
+            SetLEDCommandPacket[1] |= (byte)(address >> 7);
+            SetLEDCommandPacket[2] |= (byte)address;                       
+
+            //Send the packet to device
+            Send(SetLEDCommandPacket);
+
+            //Get acknowledgement
+            byte[] ack = Receive(1);            
+
+            if (ack[0] != SetLEDCommandPacket[0])
+            {
+                throw new LEDStateChangeUnacknowledgedException("LED State change was requested by computer, but not acknowledged by device.");
+            }
+        }
+
+        int RequestSensorChannelValue(ushort address)
         {
             if (!_serialPort.IsOpen)
             {
@@ -171,67 +223,55 @@ namespace Fenrisulfr
             _serialPort.DiscardInBuffer();
 
             //Prepare command packet
-            RequestValueCommandPacket[0] = 0x53;
-            RequestValueCommandPacket[1] = (byte)(address >> 7);
-            RequestValueCommandPacket[2] = (byte) address;
+            RequestChannelValueCommandPacket[0] = 0x53;
+            RequestChannelValueCommandPacket[1] = (byte)(address >> 7);
+            RequestChannelValueCommandPacket[2] = (byte) address;
 
-            //Send the packet to device        
-            _serialPort.Write(RequestValueCommandPacket, 0, 3);
+            //Send the packet to device  
+            Send(RequestChannelValueCommandPacket);
 
-            //Read value out            
-            ReturnData[0] = (byte)_serialPort.ReadByte();
-            ReturnData[1] = (byte)_serialPort.ReadByte();
-            ReturnData[2] = (byte)_serialPort.ReadByte();
+            //Read value out   
+            byte[] data = Receive(3);
 
-            _serialPortBusy = false;
+            Console.WriteLine(BitConverter.ToString(data));
 
-            Console.WriteLine(BitConverter.ToString(ReturnData));
-
-            if (ReturnData[0] != 0x53)
+            if (data[0] != RequestChannelValueCommandPacket[0])
             {
                 throw new Exception();
             }
-            return (ReturnData[1] << 8) + (ReturnData[2]);
+            return (data[1] << 8) + (data[2]);
         }
 
-        public void SetLEDState(ushort address, LEDState state)
+        float RequestSensorIrradiance770()
         {            
-            if (!_serialPort.IsOpen)
+            //Send the packet to device        
+            Send(RequestIrradiance770ValueCommandPacket);
+
+            //Read value out            
+            byte[] data = Receive(5);            
+
+            if (data[0] != RequestIrradiance770ValueCommandPacket[0])
             {
-                return;
+                throw new Exception();
             }
             
-            SetLEDCommandPacket[0] = 0x4C;
-            SetLEDCommandPacket[1] = 0;
-            SetLEDCommandPacket[2] = 0; 
+            return BitConverter.ToSingle(data, 1);
+        }
 
-            //Inject state data to packet
-            if (state == LEDState.On)
+        float RequestSensorIrradiance940()
+        {
+            //Send the packet to device        
+            Send(RequestIrradiance940ValueCommandPacket);
+
+            //Read value out            
+            byte[] data = Receive(5);
+
+            if (data[0] != RequestIrradiance940ValueCommandPacket[0])
             {
-                SetLEDCommandPacket[1] = 0x80;
+                throw new Exception();
             }
 
-            //Inject address of specified LED
-            SetLEDCommandPacket[1] |= (byte)(address >> 7);
-            SetLEDCommandPacket[2] |= (byte)address;
-
-            //Wait until serial port isn't being used (prevents conflicts with LED switching requests)
-            while (_serialPortBusy) { }
-            _serialPortBusy = true;
-
-            //Send the packet to device
-            _serialPort.DiscardInBuffer();
-            _serialPort.Write(SetLEDCommandPacket, 0, 3);
-
-            //Get acknowledgement
-            byte ack = (byte)_serialPort.ReadByte();
-
-            _serialPortBusy = false;
-
-            if (ack != 0x4C)
-            {
-                throw new LEDStateChangeUnacknowledgedException("LED State change was requested by computer, but not acknowledged by device.");
-            }
+            return BitConverter.ToSingle(data, 1);
         }
     }
 

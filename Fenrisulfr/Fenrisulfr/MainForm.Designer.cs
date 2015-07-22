@@ -151,11 +151,13 @@
             series1.MarkerSize = 10;
             series1.Name = "S1_770_Raw";
             series1.Points.Add(dataPoint1);
+            series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Single;
             series2.ChartArea = "ChartArea_940";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series2.MarkerSize = 10;
             series2.Name = "S1_940_Raw";
             series2.Points.Add(dataPoint2);
+            series2.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Single;
             series3.ChartArea = "ChartArea_770";
             series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series3.Name = "S1_770_MovAvg";

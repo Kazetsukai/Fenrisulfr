@@ -56,6 +56,5 @@ extern void RestartADC();
 extern uint16_t ReadSensorDATA0();
 extern void SetADCManualMode();
 
-extern double GetLuxReading();
 
 #endif /* APDS_9301_H_ */
