@@ -14,10 +14,9 @@
 
 //Define ports and pins
 #define LED_PCB				PB5
-#define LED940				PC5
-#define LED770				PC4
-#define DEBUG0				PC0
-#define DEBUG1				PC1
+#define LED770				PC0
+#define LED940_A				PC1
+#define LED940_B				PC2
 
 //Define constants
 #define UART_BAUD_RATE		2000000
@@ -42,13 +41,13 @@ void Setup()
 {
 	//Set outputs
 	DDRB |= _BV(LED_PCB);
-	DDRC |= _BV(LED770) | _BV(LED940) | _BV(DEBUG0)| _BV(DEBUG1);
+	DDRC |= _BV(LED770) | _BV(LED940_A) | _BV(LED940_B);
 
 	//Initialize timer for counting ADC integration time
 	TCNT1 = 0;									//Set initial timer value
-	TCCR1B |= _BV(CS10);						//Start timer with prescale clkI/O / 32
-	OCR1A = 15960;								//Tuned to 1ms compmatch interrupt
-	TIMSK1 |= _BV(OCIE1A);						//Start timer1 interrupt on compmatch with OCR1A (counts every ms)
+	//TCCR1B |= _BV(CS10);						//Start timer with prescale clkI/O / 32
+	//OCR1A = 15960;								//Tuned to 1ms compmatch interrupt
+	//TIMSK1 |= _BV(OCIE1A);						//Start timer1 interrupt on compmatch with OCR1A (counts every ms)
 
 	//Initialize UART
 	usart_init(USART_BAUD_SELECT_DOUBLE_SPEED(UART_BAUD_RATE,F_CPU));
@@ -68,7 +67,8 @@ void SetLEDState(uint8_t LEDState, uint8_t LEDAddress)
 		}
 		if (LEDAddress == 1)
 		{
-			set(PORTC, LED940);
+			set(PORTC, LED940_A);
+			set(PORTC, LED940_B);
 		}
 	}
 	if (LEDState == 0)
@@ -79,13 +79,15 @@ void SetLEDState(uint8_t LEDState, uint8_t LEDAddress)
 		}
 		if (LEDAddress == 1)
 		{
-			clr(PORTC, LED940);
+			clr(PORTC, LED940_A);
+			clr(PORTC, LED940_B);
 		}
 	}
 }
 
 #define CMD_LEDSTATE		0x4C
-#define CMD_READ_CH			0x53
+#define CMD_READ_CH0		0x54
+#define CMD_READ_CH1		0x55
 #define CMD_READ_Ee770		0x64
 #define CMD_READ_Ee940		0x65
 #define CMD_ADCCONFIG		0x41
@@ -100,16 +102,16 @@ void RestartIntegTimer()
 //This code will be run on the master mcu
 float GetIrradiance770()
 {
-	uint16_t ch0 = GetSensorData(0);
-	uint16_t ch1 = GetSensorData(1);
+	uint16_t ch0 = ReadSensorCH0();
+	uint16_t ch1 = ReadSensorCH1();
 
 	return (0.06879 * ch0) + (0.09426 * ch1);
 }
 
 float GetIrradiance940()
 {
-	uint16_t ch0 = GetSensorData(0);
-	uint16_t ch1 = GetSensorData(1);
+	uint16_t ch0 = ReadSensorCH0();
+	uint16_t ch1 = ReadSensorCH1();
 
 	return (0.11464 * ch0) - (0.02242 * ch1);
 }
@@ -131,30 +133,15 @@ int main(void)
 	}
 
 	SetSensorGain_16();
-	SetSensorADCIntegTime(SENSOR_ADC_INTEG_TIME_402ms);
+	SetSensorADCIntegTime(SENSOR_ADC_INTEG_TIME_14ms);
 
 	//SetADCManualMode();
-	//integTime_ms = 2;
+	//integTime_ms = 200;
 	SetLEDState(1, 0);
 	SetLEDState(1, 1);
 
 	while(1)
 	{
-		/*
-		while (1)
-		{
-			//baud rate is changed remember!!!!!!!!
-			usart_puts("0,");
-
-			sensorValue770 = GetSensorData(0);
-			usart_puts(utoa(sensorValue770, 6, 10));
-			usart_puts(",");
-
-			sensorValue940 = GetSensorData(1);
-			usart_puts(utoa(sensorValue940, 6, 10));
-			usart_puts("\n\r");
-		}*/
-
 		//Wait for instruction from PC
 		uint8_t nextByte = usart_receive();
 
@@ -177,14 +164,21 @@ int main(void)
 			usart_send(CMD_LEDSTATE);
 		}
 
-		else if (nextByte == CMD_READ_CH)
+		else if (nextByte == CMD_READ_CH0)
 		{
-			//Extract sensor address from next bytes
-			uint16_t channel = (usart_receive() << 8);
-			channel |= usart_receive();
+			uint16_t data = ReadSensorCH0();
 
-			uint16_t data = GetSensorData(channel);
+			usart_send(CMD_READ_CH0);		//Send command back
+			usart_send(data >> 8);
+			usart_send(data);
 
+		}
+
+		else if (nextByte == CMD_READ_CH1)
+		{
+			uint16_t data = ReadSensorCH1();
+
+			usart_send(CMD_READ_CH1);		//Send command back
 			usart_send(data >> 8);
 			usart_send(data);
 
@@ -207,29 +201,12 @@ int main(void)
 			usart_send(CMD_READ_Ee940);		//Send command back
 			usart_send_f((char*)&irrad940);
 		}
-
-		/*
-		//Not working yet
-		else if (nextByte == CMD_ADCCONFIG)
-		{
-			//Extract ADC config from next byte
-			uint8_t adcConfig = usart_receive();
-			uint8_t vref = (adcConfig >> 7);
-			uint8_t prescaler = adcConfig & 0x07;
-
-			//Set the new ADC configurations
-			SetADCConfig(prescaler, vref);
-
-			//Send acknowledgement to PC
-			usart_send(CMD_ADCCONFIG);
-		}*/
 	}
 }
 
 
 ISR(TIMER1_COMPA_vect)
 {
-	/*
 	TCNT1 = 0;
 	timerElapsed_ms++;
 
@@ -237,7 +214,7 @@ ISR(TIMER1_COMPA_vect)
 	if (timerElapsed_ms >= integTime_ms)
 	{
 		RestartIntegTimer();
-	}*/
+	}
 }
 
 

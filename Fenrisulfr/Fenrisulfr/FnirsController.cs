@@ -15,7 +15,8 @@ namespace Fenrisulfr
     public class FnirsController
     {
         private readonly static byte[] SetLEDCommandPacket = { 0x4C, 0x00, 0x00 };
-        private readonly static byte[] RequestChannelValueCommandPacket = { 0x53, 0x00, 0x00 };
+        private readonly static byte[] RequestCH0CommandPacket = { 0x54 };
+        private readonly static byte[] RequestCH1CommandPacket = { 0x55 };
         private readonly static byte[] RequestIrradiance770ValueCommandPacket = { 0x64 };
         private readonly static byte[] RequestIrradiance940ValueCommandPacket = { 0x65 };  
         private readonly static byte[] ReturnData = new byte[5];
@@ -139,7 +140,6 @@ namespace Fenrisulfr
             timeOfLastReceive = (int)_stopwatch.ElapsedMilliseconds;
             Console.WriteLine("REC :" + BitConverter.ToString(receiveData) + "\t\t" + timeSinceLastReceive.ToString());
             
-
             return receiveData;
         }
 
@@ -170,8 +170,8 @@ namespace Fenrisulfr
         void DoWork()
         {
             //Get sensor data
-            sensorValue770 = RequestSensorIrradiance770(); //RequestSensorChannelValue(0);    
-            sensorValue940 = RequestSensorIrradiance940(); //RequestSensorChannelValue(1);
+            sensorValue770 = /*RequestSensorIrradiance770();*/ RequestSensorCH0Value();    
+            sensorValue940 = /*RequestSensorIrradiance940();*/ RequestSensorCH1Value();
             Thread.Sleep(10);
 
             //Console.WriteLine("770: " + sensorValue770.ToString());
@@ -209,40 +209,36 @@ namespace Fenrisulfr
             }
         }
 
-        int RequestSensorChannelValue(ushort address)
-        {
-            if (!_serialPort.IsOpen)
-            {
-                return 0;
-            }
-
-            //Wait until serial port isn't being used (prevents conflicts with LED switching requests)
-            while (_serialPortBusy) { }
-            _serialPortBusy = true;
-
-            //Clear serial port in buffer
-            _serialPort.DiscardInBuffer();
-
-            //Prepare command packet
-            RequestChannelValueCommandPacket[0] = 0x53;
-            RequestChannelValueCommandPacket[1] = (byte)(address >> 7);
-            RequestChannelValueCommandPacket[2] = (byte) address;
-
+        int RequestSensorCH0Value()
+        {    
             //Send the packet to device  
-            Send(RequestChannelValueCommandPacket);
+            Send(RequestCH0CommandPacket);
 
             //Read value out   
             byte[] data = Receive(3);
 
-            Console.WriteLine(BitConverter.ToString(data));
-
-            if (data[0] != RequestChannelValueCommandPacket[0])
+            if (data[0] != RequestCH0CommandPacket[0])
             {
                 throw new Exception();
             }
             return (data[1] << 8) + (data[2]);
         }
 
+        int RequestSensorCH1Value()
+        {
+            //Send the packet to device  
+            Send(RequestCH1CommandPacket);
+
+            //Read value out   
+            byte[] data = Receive(3);
+
+            if (data[0] != RequestCH1CommandPacket[0])
+            {
+                throw new Exception();
+            }
+            return (data[1] << 8) + (data[2]);
+        }
+        
         float RequestSensorIrradiance770()
         {            
             //Send the packet to device        

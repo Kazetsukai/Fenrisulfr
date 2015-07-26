@@ -69,36 +69,18 @@ uint8_t SensorCommsAreWorking()
 	}
 }
 
-uint16_t ReadSensorDATA0()
+uint16_t ReadSensorCH0()
 {
 	uint16_t value = ReadSensorRegister(SENSOR_REG_DATA0LOW);
 	value |= ReadSensorRegister(SENSOR_REG_DATA0HIGH) << 8;
 	return value;
 }
 
-uint16_t ReadSensorDATA1()
+uint16_t ReadSensorCH1()
 {
 	uint16_t value = ReadSensorRegister(SENSOR_REG_DATA1LOW);
 	value |= ReadSensorRegister(SENSOR_REG_DATA1HIGH) << 8;
 	return value;
-}
-
-
-uint16_t GetSensorData(uint8_t channel)
-{
-	if (channel == 0)
-	{
-		return ReadSensorDATA0();
-	}
-
-	else if (channel == 1)
-	{
-		return ReadSensorDATA1();
-	}
-	else
-	{
-		return 0xAA;
-	}
 }
 
 void SetSensorGain_1()
@@ -126,9 +108,14 @@ void SetSensorGain_16()
 void SetSensorADCIntegTime(uint8_t SENSOR_ADC_INTEG_TIME)
 {
 	//Get register contents to preserve other values
-	uint8_t regContents = ReadSensorRegister(SENSOR_REG_TIMING);
+	uint8_t regContents = SENSOR_ADC_INTEG_TIME;
 
-	WriteSensorRegister(SENSOR_REG_TIMING, regContents & SENSOR_ADC_INTEG_TIME);	//Set ADC integration time
+	if (SENSOR_GAIN == 16)
+	{
+		regContents |= 0x10;
+	}
+
+	WriteSensorRegister(SENSOR_REG_TIMING, regContents);	//Set ADC integration time
 }
 
 void StartSensorADC()
@@ -170,7 +157,7 @@ double GetLuxReading()
 	double lux = 0;
 
 	//Info taken from datasheet (page 4) to calculate lux for this sensor. Relies on data from both ADC channels
-	uint16_t channel0Value = ReadSensorDATA0();
+	uint16_t channel0Value = ReadSensorCH0();
 	uint16_t channel1Value = ReadSensorDATA1();
 
 	double channelRatio = channel1Value / channel0Value;
