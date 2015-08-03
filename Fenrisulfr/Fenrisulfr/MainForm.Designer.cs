@@ -125,19 +125,25 @@
             chartArea1.AxisX.ScaleView.MinSize = 10D;
             chartArea1.AxisX.ScaleView.MinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
             chartArea1.AxisX.ScaleView.SizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
-            chartArea1.AxisY.Maximum = 100000D;
             chartArea1.AxisY.Minimum = 0D;
-            chartArea1.AxisY.ScaleView.MinSize = 10D;
+            chartArea1.AxisY.ScaleView.MinSize = 0.0001D;
+            chartArea1.AxisY.ScaleView.SmallScrollMinSize = 1E-05D;
             chartArea1.AxisY.ScaleView.SmallScrollMinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
             chartArea1.BackColor = System.Drawing.Color.Transparent;
+            chartArea1.CursorX.Interval = 0.0001D;
             chartArea1.CursorX.LineColor = System.Drawing.Color.White;
+            chartArea1.CursorY.Interval = 0.0001D;
             chartArea1.CursorY.IsUserEnabled = true;
             chartArea1.CursorY.IsUserSelectionEnabled = true;
             chartArea1.CursorY.LineColor = System.Drawing.Color.White;
             chartArea1.Name = "ChartArea_770";
-            chartArea2.AxisY.Maximum = 100000D;
+            chartArea2.AxisY.Minimum = 0D;
+            chartArea2.AxisY.ScaleView.MinSize = 0.0001D;
+            chartArea2.AxisY.ScaleView.SmallScrollMinSize = 0.0001D;
             chartArea2.BackColor = System.Drawing.Color.Transparent;
+            chartArea2.CursorX.Interval = 0.0001D;
             chartArea2.CursorX.LineColor = System.Drawing.Color.White;
+            chartArea2.CursorY.Interval = 0.0001D;
             chartArea2.CursorY.IsUserEnabled = true;
             chartArea2.CursorY.IsUserSelectionEnabled = true;
             chartArea2.CursorY.LineColor = System.Drawing.Color.White;
@@ -168,7 +174,7 @@
             this.chartData.Series.Add(series2);
             this.chartData.Series.Add(series3);
             this.chartData.Series.Add(series4);
-            this.chartData.Size = new System.Drawing.Size(332, 592);
+            this.chartData.Size = new System.Drawing.Size(705, 592);
             this.chartData.TabIndex = 9;
             this.chartData.Text = "chart";
             title1.Alignment = System.Drawing.ContentAlignment.TopCenter;
@@ -282,7 +288,7 @@
             this.chartFFT.Series.Add(series6);
             this.chartFFT.Series.Add(series7);
             this.chartFFT.Series.Add(series8);
-            this.chartFFT.Size = new System.Drawing.Size(670, 589);
+            this.chartFFT.Size = new System.Drawing.Size(297, 589);
             this.chartFFT.TabIndex = 14;
             this.chartFFT.Text = "chart1";
             title3.Alignment = System.Drawing.ContentAlignment.BottomCenter;
@@ -476,7 +482,7 @@
             // 
             this.splitpanel_charts.Panel2.Controls.Add(this.chartFFT);
             this.splitpanel_charts.Size = new System.Drawing.Size(1026, 599);
-            this.splitpanel_charts.SplitterDistance = 342;
+            this.splitpanel_charts.SplitterDistance = 715;
             this.splitpanel_charts.TabIndex = 20;
             // 
             // FNIRS

@@ -36,6 +36,8 @@ namespace Fenrisulfr
 
         float sensorValue770;
         float sensorValue940;
+        float ch0;
+        float ch1;
 
         public void Reset()
         {
@@ -170,9 +172,17 @@ namespace Fenrisulfr
         void DoWork()
         {
             //Get sensor data
-            sensorValue770 = /*RequestSensorIrradiance770();*/ RequestSensorCH0Value();    
-            sensorValue940 = /*RequestSensorIrradiance940();*/ RequestSensorCH1Value();
-            Thread.Sleep(10);
+            ch0 = RequestSensorCH0Value();    
+            ch1 = RequestSensorCH1Value();
+
+            //Calculate irradiance values
+            //sensorValue770 = ((953f * ch0) - (1258f * ch1)) / 2029184f;
+            //sensorValue940 = ((6558f * ch1) - (3355f * ch0)) / 4058368f;
+
+            sensorValue770 = ch0;
+            sensorValue940 = ch1;
+
+            Thread.Sleep(5);
 
             //Console.WriteLine("770: " + sensorValue770.ToString());
             //Console.WriteLine("940: " + sensorValue940.ToString());

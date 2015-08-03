@@ -27,8 +27,8 @@ I/O Configuration
 #define SDAPIN	PINC	//TAKE PORTC TO READ DATA
 #define SCLPIN	PINC	//TAKE PORTC TO READ DATA
 
-#define SCL	PC4			//PORTC.3 PIN AS SCL PIN
-#define SDA	PC3			//PORTC.2 PIN AS SDA PIN
+#define SCL	PC4
+#define SDA	PC3
 
 /*
 #define SOFT_I2C_SDA_LOW	SDADDR |= ((1<<SDA))

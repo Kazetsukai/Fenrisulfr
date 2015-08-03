@@ -5,7 +5,7 @@
 #include <util/delay.h>
 #include <stdlib.h>
 #include "usart.h"
-#include "APDS-9301.h"
+#include "TLS25911.h"
 
 //Define macros
 #define set(port, pin) (port |= _BV(pin))
@@ -94,8 +94,8 @@ void SetLEDState(uint8_t LEDState, uint8_t LEDAddress)
 
 void RestartIntegTimer()
 {
-	StopSensorADC();
-	StartSensorADC();
+	//StopSensorADC();
+	//StartSensorADC();
 	timerElapsed_ms = 0;
 }
 
@@ -105,7 +105,7 @@ float GetIrradiance770()
 	uint16_t ch0 = ReadSensorCH0();
 	uint16_t ch1 = ReadSensorCH1();
 
-	return (0.06879 * ch0) + (0.09426 * ch1);
+	return (3.5817 * ch0) - (4.7278 * ch1);
 }
 
 float GetIrradiance940()
@@ -113,7 +113,7 @@ float GetIrradiance940()
 	uint16_t ch0 = ReadSensorCH0();
 	uint16_t ch1 = ReadSensorCH1();
 
-	return (0.11464 * ch0) - (0.02242 * ch1);
+	return (12.3209 * ch1) - (6.3037 * ch0);
 }
 
 int main(void)
@@ -132,13 +132,10 @@ int main(void)
 		}
 	}
 
-	SetSensorGain_16();
-	SetSensorADCIntegTime(SENSOR_ADC_INTEG_TIME_14ms);
-
-	//SetADCManualMode();
-	//integTime_ms = 200;
+	SetSensorGain(SENSOR_GAIN_MAX);
+	SetSensorATIME(SENSOR_ATIME_300ms);
 	SetLEDState(1, 0);
-	SetLEDState(1, 1);
+    SetLEDState(1, 1);
 
 	while(1)
 	{
