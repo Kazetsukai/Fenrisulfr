@@ -22,19 +22,19 @@ namespace Fenrisulfr
     public partial class FNIRS : Form
     {
         //private IFnirsController _controller = new FnirsController();
-        private IFnirsController _controller = new FakeFnirs();
+        private IFnirsController _controller = new FnirsController();
         
         
         private List<SensorResult> _trace = new List<SensorResult>();
         private DateTime _traceStart;
         
-        int _chartWidth = 10000;
-        bool _drawFFT770 = true;
-        bool _drawFFT940 = true;
-        bool _fitPolyReg_770;
-        bool _fitPolyReg_940;
+        int _chartWidth = 100000;
+        bool _drawFFTHb = true;
+        bool _drawFFTHbO2 = true;
+        bool _fitPolyReg_Hb;
+        bool _fitPolyReg_HbO2;
         int _polyRegOrder = 16;
-        private int _samples = 100;
+        private int _samples = 10000;
         private int _runningAverageSamples = 1;
 
         public FNIRS()
@@ -45,22 +45,33 @@ namespace Fenrisulfr
             //this.Size = Settings.Default.WindowSize;
             t_sampleRate.Text = Settings.Default.SampleRate.ToString();
             t_windowSize.Text = Settings.Default.FFTWindowSize.ToString();
-            chartData.ChartAreas["ChartArea_770"].AxisY.ScaleView.Zoom(Settings.Default.ChartScaleViewMinY770nm, 10000);//Properties.Settings.Default.ChartScaleViewMaxY770nm);
-            chartData.ChartAreas["ChartArea_940"].AxisY.ScaleView.Zoom(Settings.Default.ChartScaleViewMinY940nm, 10000);//Properties.Settings.Default.ChartScaleViewMaxY940nm);
+            chartData.ChartAreas["ChartArea_Hb"].AxisY.ScaleView.Zoom(Settings.Default.ChartScaleViewMinYHb, 66000);//Properties.Settings.Default.ChartScaleViewMaxYHb);
+            chartData.ChartAreas["ChartArea_HbO2"].AxisY.ScaleView.Zoom(Settings.Default.ChartScaleViewMinYHbO2, 66000);//Properties.Settings.Default.ChartScaleViewMaxYHbO2);
             
             //Initialize charts
-            int borderWidth = 2;
-            chartData.Series["S1_770_Raw"].Color = Color.DarkGreen;
-            chartData.Series["S1_940_Raw"].Color = Color.DarkRed;
-            chartData.Series["S1_770_Raw"].BorderWidth = borderWidth;
-            chartData.Series["S1_940_Raw"].BorderWidth = borderWidth;
-            chartData.ChartAreas["ChartArea_770"].AxisX.ScaleView.Zoomable = true;
-            chartData.ChartAreas["ChartArea_940"].AxisX.ScaleView.Zoomable = true;
+            int borderWidth = 1;
 
-            chartFFT.Series["S1_770_FFT"].Color = Color.DarkGreen;
-            chartFFT.Series["S1_940_FFT"].Color = Color.DarkRed;
-            chartFFT.Series["S1_770_FFT"].BorderWidth = borderWidth;
-            chartFFT.Series["S1_940_FFT"].BorderWidth = borderWidth;
+            chartData.Series["S1_Hb"].Color = Color.DarkGreen;
+            chartData.Series["S1_Hb"].BorderWidth = borderWidth;
+            chartData.Series["S1_Hb"].BorderDashStyle = ChartDashStyle.Dot;
+
+            chartData.Series["S1_HbO2"].Color = Color.DarkRed;
+            chartData.Series["S1_HbO2"].BorderWidth = borderWidth;
+            chartData.Series["S1_HbO2"].BorderDashStyle = ChartDashStyle.Dot;
+
+            chartData.Series["S1_Hb_RunAvg"].Color = Color.Green;
+            chartData.Series["S1_Hb_RunAvg"].BorderWidth = borderWidth;
+
+            chartData.Series["S1_HbO2_RunAvg"].Color = Color.Red;            
+            chartData.Series["S1_HbO2_RunAvg"].BorderWidth = borderWidth;
+
+            chartData.ChartAreas["ChartArea_Hb"].AxisX.ScaleView.Zoomable = true;
+            chartData.ChartAreas["ChartArea_HbO2"].AxisX.ScaleView.Zoomable = true;
+
+            chartFFT.Series["S1_Hb_FFT"].Color = Color.DarkGreen;
+            chartFFT.Series["S1_HbO2_FFT"].Color = Color.DarkRed;
+            chartFFT.Series["S1_Hb_FFT"].BorderWidth = borderWidth;
+            chartFFT.Series["S1_HbO2_FFT"].BorderWidth = borderWidth;
             chartFFT.ChartAreas["ChartArea"].AxisX.ScaleView.Zoomable = true;
 
             //Populate comport select combo box
@@ -132,18 +143,7 @@ namespace Fenrisulfr
                 t_sampleRate.Enabled = false;
 
                 _controller.Start();
-                UI_UpdateTimer.Start();
-
-                //Turn on LEDs if required
-                if (c_ledOn770.Checked)
-                {
-                    //_controller.SetSensorLEDState(0, LEDState.On);                  
-                }
-                if (c_ledOn940.Checked)
-                {
-                    //_controller.SetSensorLEDState(1, LEDState.On);
-                }
-
+                UI_UpdateTimer.Start();   
             }
             else if (_controller.GetState() == FnirsControllerState.Running)
             {
@@ -196,23 +196,32 @@ namespace Fenrisulfr
 
             var result = _trace[_trace.Count - 1];
 
-            var avg770 = data.Select(d => d.Read770).RunningAverage(_runningAverageSamples).ToArray();
-            var avg940 = data.Select(d => d.Read940).RunningAverage(_runningAverageSamples).ToArray();
+            var Hb = SignalUtil.Hb(data).ToArray();
+            var HbO2 = SignalUtil.HbO2(data).ToArray();
+                        
+            var avgHb = SignalUtil.RunningAverage(Hb, _runningAverageSamples).ToArray();
+            var avgHbO2 = SignalUtil.RunningAverage(HbO2, _runningAverageSamples).ToArray();
 
-            chartData.Series["S1_770_Raw"].Points.Clear();
-            chartData.Series["S1_940_Raw"].Points.Clear();
+            //Clear the chart
+            chartData.Series["S1_Hb"].Points.Clear();
+            chartData.Series["S1_HbO2"].Points.Clear();
+            chartData.Series["S1_Hb_RunAvg"].Points.Clear();
+            chartData.Series["S1_HbO2_RunAvg"].Points.Clear();
+
+            //Plot the latest data on the chart
             for (int i = 0; i < data.Length; i++)
             {
-                chartData.Series["S1_770_Raw"].Points.AddXY(data[i].Milliseconds, avg770[i]);
-                chartData.Series["S1_940_Raw"].Points.AddXY(data[i].Milliseconds, avg940[i]);
+                chartData.Series["S1_Hb"].Points.AddXY(data[i].Milliseconds, Hb[i]);
+                chartData.Series["S1_HbO2"].Points.AddXY(data[i].Milliseconds, HbO2[i]);
+                chartData.Series["S1_Hb_RunAvg"].Points.AddXY(data[i].Milliseconds, avgHb[i]);
+                chartData.Series["S1_HbO2_RunAvg"].Points.AddXY(data[i].Milliseconds, avgHbO2[i]);
             }
-
-
-            chartData.ChartAreas["ChartArea_770"].AxisX.Minimum = result.Milliseconds - _chartWidth;
-            chartData.ChartAreas["ChartArea_770"].AxisX.Maximum = result.Milliseconds;
-
-            chartData.ChartAreas["ChartArea_940"].AxisX.Minimum = result.Milliseconds - _chartWidth;
-            chartData.ChartAreas["ChartArea_940"].AxisX.Maximum = result.Milliseconds;
+            
+            //Rescale chart view (scrolls along with incoming data)
+            chartData.ChartAreas["ChartArea_Hb"].AxisX.Minimum = result.Milliseconds - _chartWidth;
+            chartData.ChartAreas["ChartArea_Hb"].AxisX.Maximum = result.Milliseconds;
+            chartData.ChartAreas["ChartArea_HbO2"].AxisX.Minimum = result.Milliseconds - _chartWidth;
+            chartData.ChartAreas["ChartArea_HbO2"].AxisX.Maximum = result.Milliseconds;
         }
 
         private void chart_Click(object sender, EventArgs e)
@@ -233,10 +242,10 @@ namespace Fenrisulfr
             {
                 using (var writer = new StreamWriter(saveFileDialog.OpenFile()))
                 {
-                    writer.WriteLine("{0},{1},{2}", "Milliseconds", "770nm", "940nm");
+                    writer.WriteLine("{0},{1},{2}", "Milliseconds", "Hb", "HbO2");
 
                     foreach (var result in _trace)
-                        writer.WriteLine("{0},{1},{2}", result.Milliseconds, result.Read770, result.Read940);
+                        writer.WriteLine("{0},{1},{2}", result.Milliseconds, result.CH0, result.CH1);
                 }
             }
         }
@@ -256,10 +265,10 @@ namespace Fenrisulfr
 
         private void chart_AxisViewChanged(object sender, ViewEventArgs e)
         {
-            Settings.Default.ChartScaleViewMaxY770nm = chartData.ChartAreas["ChartArea_770"].AxisY.ScaleView.ViewMaximum;
-            Settings.Default.ChartScaleViewMaxY940nm = chartData.ChartAreas["ChartArea_940"].AxisY.ScaleView.ViewMaximum;
-            Settings.Default.ChartScaleViewMinY770nm = chartData.ChartAreas["ChartArea_770"].AxisY.ScaleView.ViewMinimum;
-            Settings.Default.ChartScaleViewMinY940nm = chartData.ChartAreas["ChartArea_940"].AxisY.ScaleView.ViewMinimum;
+            Settings.Default.ChartScaleViewMaxYHb = chartData.ChartAreas["ChartArea_Hb"].AxisY.ScaleView.ViewMaximum;
+            Settings.Default.ChartScaleViewMaxYHbO2 = chartData.ChartAreas["ChartArea_HbO2"].AxisY.ScaleView.ViewMaximum;
+            Settings.Default.ChartScaleViewMinYHb = chartData.ChartAreas["ChartArea_Hb"].AxisY.ScaleView.ViewMinimum;
+            Settings.Default.ChartScaleViewMinYHbO2 = chartData.ChartAreas["ChartArea_HbO2"].AxisY.ScaleView.ViewMinimum;
 
             Settings.Default.Save(); 
         }
@@ -329,24 +338,24 @@ namespace Fenrisulfr
             }
         }
 
-        private void ch_drawFFT770_CheckedChanged(object sender, EventArgs e)
+        private void ch_drawFFTHb_CheckedChanged(object sender, EventArgs e)
         {
-            _drawFFT770 = ch_drawFFT770.Checked;
+            _drawFFTHb = ch_drawFFTHb.Checked;
         }
 
-        private void ch_drawFFT940_CheckedChanged(object sender, EventArgs e)
+        private void ch_drawFFTHbO2_CheckedChanged(object sender, EventArgs e)
         {
-            _drawFFT940 = ch_drawFFT940.Checked;
+            _drawFFTHbO2 = ch_drawFFTHbO2.Checked;
         }  
 
-        private void ch_bestFitLine770_CheckedChanged(object sender, EventArgs e)
+        private void ch_bestFitLineHb_CheckedChanged(object sender, EventArgs e)
         {
-            _fitPolyReg_770 = ch_FitPolyReg770.Checked;
+            _fitPolyReg_Hb = ch_FitPolyRegHb.Checked;
         }
 
-        private void ch_FitPolyReg940_CheckedChanged(object sender, EventArgs e)
+        private void ch_FitPolyRegHbO2_CheckedChanged(object sender, EventArgs e)
         {
-            _fitPolyReg_940 = ch_FitPolyReg940.Checked;
+            _fitPolyReg_HbO2 = ch_FitPolyRegHbO2.Checked;
         }
 
         private void t_polyRegOrder_TextChanged(object sender, EventArgs e)
@@ -378,30 +387,6 @@ namespace Fenrisulfr
         private void FNIRS_FormClosing(object sender, FormClosingEventArgs e)
         {
             _controller.Stop(); 
-        }
-
-        private void c_ledOn770_CheckedChanged(object sender, EventArgs e)
-        {
-            if (c_ledOn770.Checked)
-            {
-                //_controller.SetSensorLEDState(0, LEDState.On);  
-            }
-            else
-            {
-               // _controller.SetSensorLEDState(0, LEDState.Off);  
-            }
-        }
-
-        private void c_ledOn940_CheckedChanged(object sender, EventArgs e)
-        {
-            if (c_ledOn940.Checked)
-            {
-                //_controller.SetSensorLEDState(1, LEDState.On);
-            }
-            else
-            {
-               // _controller.SetSensorLEDState(1, LEDState.Off);
-            }
-        }
+        }        
     }
 }

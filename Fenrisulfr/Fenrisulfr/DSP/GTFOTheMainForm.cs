@@ -111,50 +111,50 @@ namespace Fenrisulfr.DSP
         public void CodeThatShouldntBeInTheMainForm()
         {
             //Update data chart
-            //chartData.Series["S1_770_Raw"].Points.Add(new DataPoint(result.Milliseconds, (double)result.Read770));
-            //chartData.Series["S1_940_Raw"].Points.Add(new DataPoint(result.Milliseconds, (double)result.Read940));
+            //chartData.Series["S1_Hb"].Points.Add(new DataPoint(result.Milliseconds, (double)result.ReadHb));
+            //chartData.Series["S1_HbO2"].Points.Add(new DataPoint(result.Milliseconds, (double)result.ReadHbO2));
 
-            //chartData.ChartAreas["ChartArea_770"].AxisX.Minimum = result.Milliseconds - _chartWidth;
-            //chartData.ChartAreas["ChartArea_770"].AxisX.Maximum = result.Milliseconds;
+            //chartData.ChartAreas["ChartArea_Hb"].AxisX.Minimum = result.Milliseconds - _chartWidth;
+            //chartData.ChartAreas["ChartArea_Hb"].AxisX.Maximum = result.Milliseconds;
 
-            //chartData.ChartAreas["ChartArea_940"].AxisX.Minimum = result.Milliseconds - _chartWidth;
-            //chartData.ChartAreas["ChartArea_940"].AxisX.Maximum = result.Milliseconds;
+            //chartData.ChartAreas["ChartArea_HbO2"].AxisX.Minimum = result.Milliseconds - _chartWidth;
+            //chartData.ChartAreas["ChartArea_HbO2"].AxisX.Maximum = result.Milliseconds;
                 
             //Update FFT chart                
-            //if (chartData.Series["S1_770_Raw"].Points.Count > Properties.Settings.Default.FFTWindowSize)
+            //if (chartData.Series["S1_Hb"].Points.Count > Properties.Settings.Default.FFTWindowSize)
             //{              
             //    List<DataPoint> fftWindowData = new List<DataPoint>();
                 
             //    //Populate list of data to perform FFT on
             //    for (int i = 0; i < Properties.Settings.Default.FFTWindowSize; i++)
             //    {
-            //        fftWindowData.Add(chartData.Series["S1_770_Raw"].Points[(chartData.Series["S1_770_Raw"].Points.Count - 1) - (Properties.Settings.Default.FFTWindowSize - i)]);
+            //        fftWindowData.Add(chartData.Series["S1_Hb"].Points[(chartData.Series["S1_Hb"].Points.Count - 1) - (Properties.Settings.Default.FFTWindowSize - i)]);
             //    }                 
 
             //    //Apply FFT to the data
-            //    double[] fftData770X = new double[Properties.Settings.Default.FFTWindowSize / 2];
-            //    double[] fftData770Y = new double[Properties.Settings.Default.FFTWindowSize / 2];
+            //    double[] fftDataHbX = new double[Properties.Settings.Default.FFTWindowSize / 2];
+            //    double[] fftDataHbY = new double[Properties.Settings.Default.FFTWindowSize / 2];
 
-            //    GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate(), out fftData770X, out fftData770Y);
+            //    GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate(), out fftDataHbX, out fftDataHbY);
 
             //    //Clear the chart
-            //    chartFFT.Series["S1_770_FFT"].Points.Clear();
-            //    chartFFT.Series["S1_770_BestFitLine"].Points.Clear();
+            //    chartFFT.Series["S1_Hb_FFT"].Points.Clear();
+            //    chartFFT.Series["S1_Hb_BestFitLine"].Points.Clear();
 
             //    //Draw the data on the chart
-            //    if (_drawFFT770)
+            //    if (_drawFFTHb)
             //    {
             //        for (int i = 0; i < Properties.Settings.Default.FFTWindowSize / 2; i++)
             //        {
-            //            chartFFT.Series["S1_770_FFT"].Points.Add(new DataPoint(fftData770X[i], fftData770Y[i]));
+            //            chartFFT.Series["S1_Hb_FFT"].Points.Add(new DataPoint(fftDataHbX[i], fftDataHbY[i]));
             //        }
             //    }
 
             //    //Draw best fit line
-            //    if (_fitPolyReg_770)
+            //    if (_fitPolyReg_Hb)
             //    {
             //        //Calculate polynomial constants for regression line
-            //        double[] polynomialConstants = Fit.Polynomial(fftData770X, fftData770Y, _polyRegOrder);
+            //        double[] polynomialConstants = Fit.Polynomial(fftDataHbX, fftDataHbY, _polyRegOrder);
                         
             //        //Draw the line of best fit on chart
             //        for (int i = 0; i < Properties.Settings.Default.FFTWindowSize / 2; i++)
@@ -163,47 +163,47 @@ namespace Fenrisulfr.DSP
 
             //            for (int j = 0; j < polynomialConstants.Length; j++)
             //            {
-            //                y += polynomialConstants[j] * Math.Pow(fftData770X[i], j);
+            //                y += polynomialConstants[j] * Math.Pow(fftDataHbX[i], j);
             //            }                          
 
-            //            chartFFT.Series["S1_770_BestFitLine"].Points.Add(new DataPoint(fftData770X[i], y));
+            //            chartFFT.Series["S1_Hb_BestFitLine"].Points.Add(new DataPoint(fftDataHbX[i], y));
             //        }
             //    }
             //}
 
-            //if (chartData.Series["S1_940_Raw"].Points.Count > Properties.Settings.Default.FFTWindowSize)
+            //if (chartData.Series["S1_HbO2"].Points.Count > Properties.Settings.Default.FFTWindowSize)
             //{
             //    List<DataPoint> fftWindowData = new List<DataPoint>();
 
             //    for (int i = 0; i < Properties.Settings.Default.FFTWindowSize; i++)
             //    {
-            //        fftWindowData.Add(chartData.Series["S1_940_Raw"].Points[(chartData.Series["S1_940_Raw"].Points.Count - 1) - (Properties.Settings.Default.FFTWindowSize - i)]);
+            //        fftWindowData.Add(chartData.Series["S1_HbO2"].Points[(chartData.Series["S1_HbO2"].Points.Count - 1) - (Properties.Settings.Default.FFTWindowSize - i)]);
             //    }
                     
             //    //Apply FFT to the data
-            //    double[] fftData940X = new double[Properties.Settings.Default.FFTWindowSize / 2];
-            //    double[] fftData940Y = new double[Properties.Settings.Default.FFTWindowSize / 2];
+            //    double[] fftDataHbO2X = new double[Properties.Settings.Default.FFTWindowSize / 2];
+            //    double[] fftDataHbO2Y = new double[Properties.Settings.Default.FFTWindowSize / 2];
 
-            //    GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate(), out fftData940X, out fftData940Y);
+            //    GetSeriesFFT(fftWindowData, Properties.Settings.Default.FFTWindowSize, _controller.GetSampleRate(), out fftDataHbO2X, out fftDataHbO2Y);
                     
             //    //Clear the chart
-            //    chartFFT.Series["S1_940_FFT"].Points.Clear();
-            //    chartFFT.Series["S1_940_BestFitLine"].Points.Clear();
+            //    chartFFT.Series["S1_HbO2_FFT"].Points.Clear();
+            //    chartFFT.Series["S1_HbO2_BestFitLine"].Points.Clear();
 
             //    //Draw the data on the chart
-            //    if (_drawFFT940)
+            //    if (_drawFFTHbO2)
             //    {
             //        for (int i = 0; i < Properties.Settings.Default.FFTWindowSize / 2; i++)
             //        {
-            //            chartFFT.Series["S1_940_FFT"].Points.Add(new DataPoint(fftData940X[i], fftData940Y[i]));
+            //            chartFFT.Series["S1_HbO2_FFT"].Points.Add(new DataPoint(fftDataHbO2X[i], fftDataHbO2Y[i]));
             //        }
             //    }
                     
             //    //Draw best fit line
-            //    if (_fitPolyReg_940)
+            //    if (_fitPolyReg_HbO2)
             //    {
             //        //Calculate polynomial constants for regression line
-            //        double[] polynomialConstants = Fit.Polynomial(fftData940X, fftData940Y, _polyRegOrder);
+            //        double[] polynomialConstants = Fit.Polynomial(fftDataHbO2X, fftDataHbO2Y, _polyRegOrder);
                         
             //        //Draw the line of best fit on chart
             //        for (int i = 0; i < Properties.Settings.Default.FFTWindowSize / 2; i++)
@@ -212,10 +212,10 @@ namespace Fenrisulfr.DSP
 
             //            for (int j = 0; j < polynomialConstants.Length; j++)
             //            {
-            //                y += polynomialConstants[j] * Math.Pow(fftData940X[i], j);
+            //                y += polynomialConstants[j] * Math.Pow(fftDataHbO2X[i], j);
             //            }                          
 
-            //            chartFFT.Series["S1_940_BestFitLine"].Points.Add(new DataPoint(fftData940X[i], y));
+            //            chartFFT.Series["S1_HbO2_BestFitLine"].Points.Add(new DataPoint(fftDataHbO2X[i], y));
             //        }
             //    }
             //}

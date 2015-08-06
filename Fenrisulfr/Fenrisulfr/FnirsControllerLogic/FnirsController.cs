@@ -16,8 +16,8 @@ namespace Fenrisulfr.FnirsControllerLogic
         private readonly static byte[] SetLEDCommandPacket = { 0x4C, 0x00, 0x00 };
         private readonly static byte[] RequestCH0CommandPacket = { 0x54 };
         private readonly static byte[] RequestCH1CommandPacket = { 0x55 };
-        private readonly static byte[] RequestIrradiance770ValueCommandPacket = { 0x64 };
-        private readonly static byte[] RequestIrradiance940ValueCommandPacket = { 0x65 };
+        private readonly static byte[] RequestIrradianceHbValueCommandPacket = { 0x64 };
+        private readonly static byte[] RequestIrradianceHbO2ValueCommandPacket = { 0x65 };
         private readonly static byte[] RequestIrradianceValuesCommandPacket =   { 0x66 }; 
         private readonly static byte[] ReturnData = new byte[5];
 
@@ -34,12 +34,12 @@ namespace Fenrisulfr.FnirsControllerLogic
 
         private bool _serialPortBusy = false;
 
-        float sensorValue770;
-        float sensorValue940;
+        float sensorValueHb;
+        float sensorValueHbO2;
         float ch0;
         float ch1;
-        byte[] float770;
-        byte[] float940;
+        byte[] floatHb;
+        byte[] floatHbO2;
         float[] irradianceValues;
 
         public void Reset()
@@ -167,19 +167,14 @@ namespace Fenrisulfr.FnirsControllerLogic
             //ch0 = RequestSensorCH0Value();
             //ch1 = RequestSensorCH1Value();   
 
-            //sensorValue770 = RequestSensorIrradiance770();
-            //sensorValue940 = RequestSensorIrradiance940();
+            //sensorValueHb = RequestSensorIrradianceHb();
+            //sensorValueHbO2 = RequestSensorIrradianceHbO2();
 
-            irradianceValues = RequestSensorIrradianceValues();
-            sensorValue770 = irradianceValues[0];
-            sensorValue940 = irradianceValues[1];
-            
-            //Thread.Sleep(5);
-
-            //Console.WriteLine("770: " + sensorValue770.ToString());
-            //Console.WriteLine("940: " + sensorValue940.ToString());
-
-            _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read940 = sensorValue940, Milliseconds = (int)_stopwatch.ElapsedMilliseconds });
+            //irradianceValues = RequestSensorIrradianceValues();
+            //sensorValueHb = irradianceValues[0];
+            //sensorValueHbO2 = irradianceValues[1];                      
+            Thread.Sleep(400);
+            _results.Enqueue(new SensorResult { CH0 = RequestSensorCH0Value(), CH1 = RequestSensorCH1Value(), Milliseconds = (int)_stopwatch.ElapsedMilliseconds });
         }
 
         public void SetSensorLEDState(ushort address, LEDState state)
@@ -223,10 +218,10 @@ namespace Fenrisulfr.FnirsControllerLogic
                 throw new Exception();
             }
 
-            float770 = data.Skip(1).Take(4).ToArray();
-            float940 = data.Skip(5).Take(4).ToArray();
+            floatHb = data.Skip(1).Take(4).ToArray();
+            floatHbO2 = data.Skip(5).Take(4).ToArray();
 
-            float[] output = {BitConverter.ToSingle(float770, 0), BitConverter.ToSingle(float940, 0) };
+            float[] output = {BitConverter.ToSingle(floatHb, 0), BitConverter.ToSingle(floatHbO2, 0) };
             return output;
         }
 
@@ -260,15 +255,15 @@ namespace Fenrisulfr.FnirsControllerLogic
             return (data[1] << 8) + (data[2]);
         }
         
-        private float RequestSensorIrradiance770()
+        private float RequestSensorIrradianceHb()
         {            
             //Send the packet to device        
-            Send(RequestIrradiance770ValueCommandPacket);
+            Send(RequestIrradianceHbValueCommandPacket);
 
             //Read value out            
             byte[] data = Receive(5);            
 
-            if (data[0] != RequestIrradiance770ValueCommandPacket[0])
+            if (data[0] != RequestIrradianceHbValueCommandPacket[0])
             {
                 throw new Exception();
             }
@@ -276,15 +271,15 @@ namespace Fenrisulfr.FnirsControllerLogic
             return BitConverter.ToSingle(data, 1);
         }
 
-        private float RequestSensorIrradiance940()
+        private float RequestSensorIrradianceHbO2()
         {
             //Send the packet to device        
-            Send(RequestIrradiance940ValueCommandPacket);
+            Send(RequestIrradianceHbO2ValueCommandPacket);
 
             //Read value out            
             byte[] data = Receive(5);
 
-            if (data[0] != RequestIrradiance940ValueCommandPacket[0])
+            if (data[0] != RequestIrradianceHbO2ValueCommandPacket[0])
             {
                 throw new Exception();
             }

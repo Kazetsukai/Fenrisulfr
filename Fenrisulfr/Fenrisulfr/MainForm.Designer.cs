@@ -61,16 +61,14 @@
             this.chartFFT = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.t_windowSize = new System.Windows.Forms.TextBox();
             this.l_FFTWindowSize = new System.Windows.Forms.Label();
-            this.ch_FitPolyReg770 = new System.Windows.Forms.CheckBox();
+            this.ch_FitPolyRegHb = new System.Windows.Forms.CheckBox();
             this.b_reset = new System.Windows.Forms.Button();
             this.p_options = new System.Windows.Forms.Panel();
-            this.c_ledOn940 = new System.Windows.Forms.CheckBox();
-            this.c_ledOn770 = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
             this.t_polyRegOrder = new System.Windows.Forms.TextBox();
-            this.ch_drawFFT940 = new System.Windows.Forms.CheckBox();
-            this.ch_drawFFT770 = new System.Windows.Forms.CheckBox();
-            this.ch_FitPolyReg940 = new System.Windows.Forms.CheckBox();
+            this.ch_drawFFTHbO2 = new System.Windows.Forms.CheckBox();
+            this.ch_drawFFTHb = new System.Windows.Forms.CheckBox();
+            this.ch_FitPolyRegHbO2 = new System.Windows.Forms.CheckBox();
             this.splitpanel_charts = new System.Windows.Forms.SplitContainer();
             ((System.ComponentModel.ISupportInitialize)(this.chartData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartFFT)).BeginInit();
@@ -137,7 +135,7 @@
             chartArea1.CursorY.IsUserEnabled = true;
             chartArea1.CursorY.IsUserSelectionEnabled = true;
             chartArea1.CursorY.LineColor = System.Drawing.Color.White;
-            chartArea1.Name = "ChartArea_770";
+            chartArea1.Name = "ChartArea_Hb";
             chartArea2.AxisY.Minimum = 0D;
             chartArea2.AxisY.ScaleView.MinSize = 0.0001D;
             chartArea2.AxisY.ScaleView.SmallScrollMinSize = 0.0001D;
@@ -149,29 +147,33 @@
             chartArea2.CursorY.IsUserEnabled = true;
             chartArea2.CursorY.IsUserSelectionEnabled = true;
             chartArea2.CursorY.LineColor = System.Drawing.Color.White;
-            chartArea2.Name = "ChartArea_940";
+            chartArea2.Name = "ChartArea_HbO2";
             this.chartData.ChartAreas.Add(chartArea1);
             this.chartData.ChartAreas.Add(chartArea2);
             this.chartData.Location = new System.Drawing.Point(3, 0);
             this.chartData.Name = "chartData";
-            series1.ChartArea = "ChartArea_770";
+            series1.ChartArea = "ChartArea_Hb";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             series1.MarkerSize = 10;
-            series1.Name = "S1_770_Raw";
+            series1.Name = "S1_Hb";
             series1.Points.Add(dataPoint1);
             series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Single;
-            series2.ChartArea = "ChartArea_940";
+            series2.ChartArea = "ChartArea_HbO2";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.Color = System.Drawing.Color.Green;
             series2.MarkerSize = 10;
-            series2.Name = "S1_940_Raw";
+            series2.Name = "S1_HbO2";
             series2.Points.Add(dataPoint2);
             series2.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Single;
-            series3.ChartArea = "ChartArea_770";
+            series3.ChartArea = "ChartArea_Hb";
             series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series3.Name = "S1_770_MovAvg";
-            series4.ChartArea = "ChartArea_770";
+            series3.Color = System.Drawing.Color.Red;
+            series3.Name = "S1_Hb_RunAvg";
+            series4.ChartArea = "ChartArea_HbO2";
             series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series4.Name = "S1_940_MovAvg";
+            series4.Color = System.Drawing.Color.Lime;
+            series4.Name = "S1_HbO2_RunAvg";
             this.chartData.Series.Add(series1);
             this.chartData.Series.Add(series2);
             this.chartData.Series.Add(series3);
@@ -180,15 +182,15 @@
             this.chartData.TabIndex = 9;
             this.chartData.Text = "chart";
             title1.Alignment = System.Drawing.ContentAlignment.TopCenter;
-            title1.DockedToChartArea = "ChartArea_770";
+            title1.DockedToChartArea = "ChartArea_Hb";
             title1.IsDockedInsideChartArea = false;
-            title1.Name = "Title1";
-            title1.Text = "770nm";
+            title1.Name = "Hb";
+            title1.Text = "Hb";
             title2.Alignment = System.Drawing.ContentAlignment.TopCenter;
-            title2.DockedToChartArea = "ChartArea_940";
+            title2.DockedToChartArea = "ChartArea_HbO2";
             title2.IsDockedInsideChartArea = false;
-            title2.Name = "Title2";
-            title2.Text = "940nm";
+            title2.Name = "HbO2";
+            title2.Text = "HbO2";
             this.chartData.Titles.Add(title1);
             this.chartData.Titles.Add(title2);
             this.chartData.AxisViewChanged += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.ViewEventArgs>(this.chart_AxisViewChanged);
@@ -267,25 +269,25 @@
             this.chartFFT.Name = "chartFFT";
             series5.ChartArea = "ChartArea";
             series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series5.Name = "S1_770_FFT";
+            series5.Name = "S1_Hb_FFT";
             series5.Points.Add(dataPoint3);
             series5.YValuesPerPoint = 2;
             series6.ChartArea = "ChartArea";
             series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series6.Name = "S1_940_FFT";
+            series6.Name = "S1_HbO2_FFT";
             series6.Points.Add(dataPoint4);
             series7.BorderDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dot;
             series7.BorderWidth = 2;
             series7.ChartArea = "ChartArea";
             series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series7.Color = System.Drawing.Color.Lime;
-            series7.Name = "S1_770_BestFitLine";
+            series7.Name = "S1_Hb_BestFitLine";
             series8.BorderDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dot;
             series8.BorderWidth = 2;
             series8.ChartArea = "ChartArea";
             series8.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series8.Color = System.Drawing.Color.Red;
-            series8.Name = "S1_940_BestFitLine";
+            series8.Name = "S1_HbO2_BestFitLine";
             this.chartFFT.Series.Add(series5);
             this.chartFFT.Series.Add(series6);
             this.chartFFT.Series.Add(series7);
@@ -322,7 +324,7 @@
             this.t_windowSize.Name = "t_windowSize";
             this.t_windowSize.Size = new System.Drawing.Size(83, 20);
             this.t_windowSize.TabIndex = 15;
-            this.t_windowSize.Text = "1";
+            this.t_windowSize.Text = "50";
             this.t_windowSize.TextChanged += new System.EventHandler(this.t_windowSize_TextChanged);
             // 
             // l_FFTWindowSize
@@ -331,20 +333,20 @@
             this.l_FFTWindowSize.AutoSize = true;
             this.l_FFTWindowSize.Location = new System.Drawing.Point(14, 59);
             this.l_FFTWindowSize.Name = "l_FFTWindowSize";
-            this.l_FFTWindowSize.Size = new System.Drawing.Size(95, 13);
+            this.l_FFTWindowSize.Size = new System.Drawing.Size(91, 13);
             this.l_FFTWindowSize.TabIndex = 16;
             this.l_FFTWindowSize.Text = "Rolling AVG size :";
             // 
-            // ch_FitPolyReg770
+            // ch_FitPolyRegHb
             // 
-            this.ch_FitPolyReg770.AutoSize = true;
-            this.ch_FitPolyReg770.Location = new System.Drawing.Point(4, 465);
-            this.ch_FitPolyReg770.Name = "ch_FitPolyReg770";
-            this.ch_FitPolyReg770.Size = new System.Drawing.Size(151, 17);
-            this.ch_FitPolyReg770.TabIndex = 17;
-            this.ch_FitPolyReg770.Text = "Fit polynomial reg (770 nm)";
-            this.ch_FitPolyReg770.UseVisualStyleBackColor = true;
-            this.ch_FitPolyReg770.CheckedChanged += new System.EventHandler(this.ch_bestFitLine770_CheckedChanged);
+            this.ch_FitPolyRegHb.AutoSize = true;
+            this.ch_FitPolyRegHb.Location = new System.Drawing.Point(4, 465);
+            this.ch_FitPolyRegHb.Name = "ch_FitPolyRegHb";
+            this.ch_FitPolyRegHb.Size = new System.Drawing.Size(130, 17);
+            this.ch_FitPolyRegHb.TabIndex = 17;
+            this.ch_FitPolyRegHb.Text = "Fit polynomial reg (Hb)";
+            this.ch_FitPolyRegHb.UseVisualStyleBackColor = true;
+            this.ch_FitPolyRegHb.CheckedChanged += new System.EventHandler(this.ch_bestFitLineHb_CheckedChanged);
             // 
             // b_reset
             // 
@@ -361,16 +363,14 @@
             this.p_options.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.p_options.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.p_options.Controls.Add(this.c_ledOn940);
-            this.p_options.Controls.Add(this.c_ledOn770);
             this.p_options.Controls.Add(this.label2);
             this.p_options.Controls.Add(this.t_polyRegOrder);
-            this.p_options.Controls.Add(this.ch_drawFFT940);
-            this.p_options.Controls.Add(this.ch_drawFFT770);
-            this.p_options.Controls.Add(this.ch_FitPolyReg940);
+            this.p_options.Controls.Add(this.ch_drawFFTHbO2);
+            this.p_options.Controls.Add(this.ch_drawFFTHb);
+            this.p_options.Controls.Add(this.ch_FitPolyRegHbO2);
             this.p_options.Controls.Add(this.l_FFTWindowSize);
             this.p_options.Controls.Add(this.t_windowSize);
-            this.p_options.Controls.Add(this.ch_FitPolyReg770);
+            this.p_options.Controls.Add(this.ch_FitPolyRegHb);
             this.p_options.Controls.Add(this.label1);
             this.p_options.Controls.Add(this.t_sampleRate);
             this.p_options.Controls.Add(this.l_samples);
@@ -383,32 +383,6 @@
             this.p_options.Name = "p_options";
             this.p_options.Size = new System.Drawing.Size(234, 599);
             this.p_options.TabIndex = 19;
-            // 
-            // c_ledOn940
-            // 
-            this.c_ledOn940.AutoSize = true;
-            this.c_ledOn940.Checked = true;
-            this.c_ledOn940.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.c_ledOn940.Location = new System.Drawing.Point(4, 195);
-            this.c_ledOn940.Name = "c_ledOn940";
-            this.c_ledOn940.Size = new System.Drawing.Size(102, 17);
-            this.c_ledOn940.TabIndex = 25;
-            this.c_ledOn940.Text = "940 nm LED On";
-            this.c_ledOn940.UseVisualStyleBackColor = true;
-            this.c_ledOn940.CheckedChanged += new System.EventHandler(this.c_ledOn940_CheckedChanged);
-            // 
-            // c_ledOn770
-            // 
-            this.c_ledOn770.AutoSize = true;
-            this.c_ledOn770.Checked = true;
-            this.c_ledOn770.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.c_ledOn770.Location = new System.Drawing.Point(4, 172);
-            this.c_ledOn770.Name = "c_ledOn770";
-            this.c_ledOn770.Size = new System.Drawing.Size(102, 17);
-            this.c_ledOn770.TabIndex = 24;
-            this.c_ledOn770.Text = "770 nm LED On";
-            this.c_ledOn770.UseVisualStyleBackColor = true;
-            this.c_ledOn770.CheckedChanged += new System.EventHandler(this.c_ledOn770_CheckedChanged);
             // 
             // label2
             // 
@@ -430,42 +404,38 @@
             this.t_polyRegOrder.Text = "16";
             this.t_polyRegOrder.TextChanged += new System.EventHandler(this.t_polyRegOrder_TextChanged);
             // 
-            // ch_drawFFT940
+            // ch_drawFFTHbO2
             // 
-            this.ch_drawFFT940.AutoSize = true;
-            this.ch_drawFFT940.Checked = true;
-            this.ch_drawFFT940.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.ch_drawFFT940.Location = new System.Drawing.Point(4, 403);
-            this.ch_drawFFT940.Name = "ch_drawFFT940";
-            this.ch_drawFFT940.Size = new System.Drawing.Size(117, 17);
-            this.ch_drawFFT940.TabIndex = 21;
-            this.ch_drawFFT940.Text = "Draw FFT (940 nm)";
-            this.ch_drawFFT940.UseVisualStyleBackColor = true;
-            this.ch_drawFFT940.CheckedChanged += new System.EventHandler(this.ch_drawFFT940_CheckedChanged);
+            this.ch_drawFFTHbO2.AutoSize = true;
+            this.ch_drawFFTHbO2.Location = new System.Drawing.Point(4, 403);
+            this.ch_drawFFTHbO2.Name = "ch_drawFFTHbO2";
+            this.ch_drawFFTHbO2.Size = new System.Drawing.Size(110, 17);
+            this.ch_drawFFTHbO2.TabIndex = 21;
+            this.ch_drawFFTHbO2.Text = "Draw FFT (HbO2)";
+            this.ch_drawFFTHbO2.UseVisualStyleBackColor = true;
+            this.ch_drawFFTHbO2.CheckedChanged += new System.EventHandler(this.ch_drawFFTHbO2_CheckedChanged);
             // 
-            // ch_drawFFT770
+            // ch_drawFFTHb
             // 
-            this.ch_drawFFT770.AutoSize = true;
-            this.ch_drawFFT770.Checked = true;
-            this.ch_drawFFT770.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.ch_drawFFT770.Location = new System.Drawing.Point(4, 380);
-            this.ch_drawFFT770.Name = "ch_drawFFT770";
-            this.ch_drawFFT770.Size = new System.Drawing.Size(117, 17);
-            this.ch_drawFFT770.TabIndex = 20;
-            this.ch_drawFFT770.Text = "Draw FFT (770 nm)";
-            this.ch_drawFFT770.UseVisualStyleBackColor = true;
-            this.ch_drawFFT770.CheckedChanged += new System.EventHandler(this.ch_drawFFT770_CheckedChanged);
+            this.ch_drawFFTHb.AutoSize = true;
+            this.ch_drawFFTHb.Location = new System.Drawing.Point(4, 380);
+            this.ch_drawFFTHb.Name = "ch_drawFFTHb";
+            this.ch_drawFFTHb.Size = new System.Drawing.Size(96, 17);
+            this.ch_drawFFTHb.TabIndex = 20;
+            this.ch_drawFFTHb.Text = "Draw FFT (Hb)";
+            this.ch_drawFFTHb.UseVisualStyleBackColor = true;
+            this.ch_drawFFTHb.CheckedChanged += new System.EventHandler(this.ch_drawFFTHb_CheckedChanged);
             // 
-            // ch_FitPolyReg940
+            // ch_FitPolyRegHbO2
             // 
-            this.ch_FitPolyReg940.AutoSize = true;
-            this.ch_FitPolyReg940.Location = new System.Drawing.Point(4, 488);
-            this.ch_FitPolyReg940.Name = "ch_FitPolyReg940";
-            this.ch_FitPolyReg940.Size = new System.Drawing.Size(151, 17);
-            this.ch_FitPolyReg940.TabIndex = 19;
-            this.ch_FitPolyReg940.Text = "Fit polynomial reg (940 nm)";
-            this.ch_FitPolyReg940.UseVisualStyleBackColor = true;
-            this.ch_FitPolyReg940.CheckedChanged += new System.EventHandler(this.ch_FitPolyReg940_CheckedChanged);
+            this.ch_FitPolyRegHbO2.AutoSize = true;
+            this.ch_FitPolyRegHbO2.Location = new System.Drawing.Point(4, 488);
+            this.ch_FitPolyRegHbO2.Name = "ch_FitPolyRegHbO2";
+            this.ch_FitPolyRegHbO2.Size = new System.Drawing.Size(144, 17);
+            this.ch_FitPolyRegHbO2.TabIndex = 19;
+            this.ch_FitPolyRegHbO2.Text = "Fit polynomial reg (HbO2)";
+            this.ch_FitPolyRegHbO2.UseVisualStyleBackColor = true;
+            this.ch_FitPolyRegHbO2.CheckedChanged += new System.EventHandler(this.ch_FitPolyRegHbO2_CheckedChanged);
             // 
             // splitpanel_charts
             // 
@@ -528,17 +498,15 @@
         private System.Windows.Forms.DataVisualization.Charting.Chart chartFFT;
         private System.Windows.Forms.TextBox t_windowSize;
         private System.Windows.Forms.Label l_FFTWindowSize;
-        private System.Windows.Forms.CheckBox ch_FitPolyReg770;
+        private System.Windows.Forms.CheckBox ch_FitPolyRegHb;
         private System.Windows.Forms.Button b_reset;
         private System.Windows.Forms.Panel p_options;
         private System.Windows.Forms.SplitContainer splitpanel_charts;
-        private System.Windows.Forms.CheckBox ch_FitPolyReg940;
-        private System.Windows.Forms.CheckBox ch_drawFFT770;
-        private System.Windows.Forms.CheckBox ch_drawFFT940;
+        private System.Windows.Forms.CheckBox ch_FitPolyRegHbO2;
+        private System.Windows.Forms.CheckBox ch_drawFFTHb;
+        private System.Windows.Forms.CheckBox ch_drawFFTHbO2;
         private System.Windows.Forms.TextBox t_polyRegOrder;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.CheckBox c_ledOn940;
-        private System.Windows.Forms.CheckBox c_ledOn770;
     }
 }
 

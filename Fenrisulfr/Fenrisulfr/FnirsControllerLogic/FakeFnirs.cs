@@ -61,8 +61,8 @@ namespace Fenrisulfr.FnirsControllerLogic
             _results.Enqueue(new SensorResult()
             {
                 Milliseconds = (int)_stopwatch.ElapsedMilliseconds, 
-                Read770 = (Math.Sin(_stopwatch.ElapsedMilliseconds)+1) * 5000,
-                Read940 = (-Math.Sin(_stopwatch.ElapsedMilliseconds)+1) * 5000
+                CH0 = (Math.Sin(_stopwatch.ElapsedMilliseconds)+1) * 5000,
+                CH1 = (-Math.Sin(_stopwatch.ElapsedMilliseconds)+1) * 5000
             });
         }
 
