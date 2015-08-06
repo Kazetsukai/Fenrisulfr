@@ -1,4 +1,4 @@
-﻿namespace Fenrisulfr.Properties {
+﻿namespace Fenrisulfr.Properties{
     
     
     // This class allows you to handle specific events on the settings class:

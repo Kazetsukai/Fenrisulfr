@@ -1,6 +1,6 @@
 using System;
 
-namespace Fenrisulfr
+namespace Fenrisulfr.Exceptions
 {
     public class ComputerSaysNoException : Exception
     {

@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Fenrisulfr.Exceptions;
+using Fenrisulfr;
+using Fenrisulfr.Properties;
 
-namespace Fenrisulfr
+namespace Fenrisulfr.FnirsControllerLogic
 {
-    public class FnirsController
+    public class FnirsController : IFnirsController
     {
         private readonly static byte[] SetLEDCommandPacket = { 0x4C, 0x00, 0x00 };
         private readonly static byte[] RequestCH0CommandPacket = { 0x54 };
@@ -22,7 +21,7 @@ namespace Fenrisulfr
         private readonly static byte[] RequestIrradianceValuesCommandPacket =   { 0x66 }; 
         private readonly static byte[] ReturnData = new byte[5];
 
-        private SerialPort _serialPort = new SerialPort(Properties.Settings.Default.DeviceCOMPort, 2000000, Parity.Even, 8, StopBits.One);
+        private SerialPort _serialPort = new SerialPort(Settings.Default.DeviceCOMPort, 2000000, Parity.Even, 8, StopBits.One);
         private ConcurrentQueue<SensorResult> _results = new ConcurrentQueue<SensorResult>();
         private Task _readerThread;
         private Stopwatch _stopwatch = new Stopwatch();
@@ -49,17 +48,6 @@ namespace Fenrisulfr
             _results = new ConcurrentQueue<SensorResult>();
         }
 
-        public void SetSampleRate(double SampleRateHz)
-        {
-            _samplePeriod_ms = (int)(1000 / SampleRateHz);
-            Console.WriteLine("Sample period set to " + _samplePeriod_ms.ToString() + " ms. (Sample rate = " + SampleRateHz.ToString() + " Hz)");
-        }
-
-        public double GetSampleRate()
-        {
-            return (double)(1000.0 / _samplePeriod_ms);
-        }
-
         public FnirsControllerState GetState()
         {
             return _state;
@@ -76,7 +64,7 @@ namespace Fenrisulfr
 
             if (!_serialPort.IsOpen)
             {
-                Console.WriteLine("Opening serial port: " + Properties.Settings.Default.DeviceCOMPort);
+                Console.WriteLine("Opening serial port: " + Settings.Default.DeviceCOMPort);
                 _serialPort.Open();
             }   
 
@@ -107,17 +95,17 @@ namespace Fenrisulfr
 
         public void Stop()
         {
-            _stopping = true;            
-            _readerThread.Wait();
+            _stopping = true;
+            if (_readerThread != null) _readerThread.Wait();
             _stopwatch.Stop();
           
             _stopping = false;
             _readerThread = null;
 
-            SetSensorLEDState(0, LEDState.Off);
-            SetSensorLEDState(1, LEDState.Off);  
+            //SetSensorLEDState(0, LEDState.Off);
+            //SetSensorLEDState(1, LEDState.Off);  
 
-            Console.WriteLine("Closing serial port: " + Properties.Settings.Default.DeviceCOMPort);
+            Console.WriteLine("Closing serial port: " + Settings.Default.DeviceCOMPort);
             _serialPort.Close();
             _state = FnirsControllerState.Stopped;
         }
@@ -191,12 +179,11 @@ namespace Fenrisulfr
             //Console.WriteLine("770: " + sensorValue770.ToString());
             //Console.WriteLine("940: " + sensorValue940.ToString());
 
-            _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read940 = sensorValue940, Milliseconds = _stopwatch.ElapsedMilliseconds });
+            _results.Enqueue(new SensorResult { Read770 = sensorValue770, Read940 = sensorValue940, Milliseconds = (int)_stopwatch.ElapsedMilliseconds });
         }
 
         public void SetSensorLEDState(ushort address, LEDState state)
         {
-            return;
             SetLEDCommandPacket[0] = 0x4C;
             SetLEDCommandPacket[1] = 0;
             SetLEDCommandPacket[2] = 0;
@@ -223,7 +210,7 @@ namespace Fenrisulfr
             }
         }
 
-        float[] RequestSensorIrradianceValues()
+        private float[] RequestSensorIrradianceValues()
         {
             //Send the packet to device        
             Send(RequestIrradianceValuesCommandPacket);
@@ -243,7 +230,7 @@ namespace Fenrisulfr
             return output;
         }
 
-        int RequestSensorCH0Value()
+        private int RequestSensorCH0Value()
         {    
             //Send the packet to device  
             Send(RequestCH0CommandPacket);
@@ -258,7 +245,7 @@ namespace Fenrisulfr
             return (data[1] << 8) + (data[2]);
         }
 
-        int RequestSensorCH1Value()
+        private int RequestSensorCH1Value()
         {
             //Send the packet to device  
             Send(RequestCH1CommandPacket);
@@ -273,7 +260,7 @@ namespace Fenrisulfr
             return (data[1] << 8) + (data[2]);
         }
         
-        float RequestSensorIrradiance770()
+        private float RequestSensorIrradiance770()
         {            
             //Send the packet to device        
             Send(RequestIrradiance770ValueCommandPacket);
@@ -289,7 +276,7 @@ namespace Fenrisulfr
             return BitConverter.ToSingle(data, 1);
         }
 
-        float RequestSensorIrradiance940()
+        private float RequestSensorIrradiance940()
         {
             //Send the packet to device        
             Send(RequestIrradiance940ValueCommandPacket);
@@ -305,18 +292,4 @@ namespace Fenrisulfr
             return BitConverter.ToSingle(data, 1);
         }
     }
-
-#region Enums
-    public enum FnirsControllerState
-    {
-        Running,
-        Stopped
-    }
-
-    public enum LEDState
-    {
-        On,
-        Off
-    }
-#endregion
 }

@@ -322,7 +322,7 @@
             this.t_windowSize.Name = "t_windowSize";
             this.t_windowSize.Size = new System.Drawing.Size(83, 20);
             this.t_windowSize.TabIndex = 15;
-            this.t_windowSize.Text = "64";
+            this.t_windowSize.Text = "1";
             this.t_windowSize.TextChanged += new System.EventHandler(this.t_windowSize_TextChanged);
             // 
             // l_FFTWindowSize
@@ -333,7 +333,7 @@
             this.l_FFTWindowSize.Name = "l_FFTWindowSize";
             this.l_FFTWindowSize.Size = new System.Drawing.Size(95, 13);
             this.l_FFTWindowSize.TabIndex = 16;
-            this.l_FFTWindowSize.Text = "FFT Window size :";
+            this.l_FFTWindowSize.Text = "Rolling AVG size :";
             // 
             // ch_FitPolyReg770
             // 
