@@ -129,6 +129,7 @@
             chartArea1.AxisY.ScaleView.MinSize = 0.0001D;
             chartArea1.AxisY.ScaleView.SmallScrollMinSize = 1E-05D;
             chartArea1.AxisY.ScaleView.SmallScrollMinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
+            chartArea1.AxisY.ScaleView.SmallScrollSize = 1D;
             chartArea1.BackColor = System.Drawing.Color.Transparent;
             chartArea1.CursorX.Interval = 0.0001D;
             chartArea1.CursorX.LineColor = System.Drawing.Color.White;
@@ -140,6 +141,7 @@
             chartArea2.AxisY.Minimum = 0D;
             chartArea2.AxisY.ScaleView.MinSize = 0.0001D;
             chartArea2.AxisY.ScaleView.SmallScrollMinSize = 0.0001D;
+            chartArea2.AxisY.ScaleView.SmallScrollSize = 1D;
             chartArea2.BackColor = System.Drawing.Color.Transparent;
             chartArea2.CursorX.Interval = 0.0001D;
             chartArea2.CursorX.LineColor = System.Drawing.Color.White;

@@ -7,9 +7,6 @@
 
 #include "TLS25911.h"
 
-uint8_t _GAIN;
-uint8_t _ATIME;
-
 void SensorEnable()
 {
 	WriteSensorRegister(SENSOR_COMMAND_BIT | SENSOR_REG_ENABLE,  SENSOR_ENABLE_POWERON | SENSOR_ENABLE_AEN);	//Enable ALS and power on without interrupts
@@ -24,8 +21,6 @@ void SensorInit()
 {
 	SoftI2CInit();
 	SensorEnable();
-	_GAIN = SENSOR_GAIN_MAX;
-	_ATIME = SENSOR_ATIME_600ms;
 }
 
 uint8_t WriteSensorRegister(uint8_t address, uint8_t data)
@@ -42,7 +37,7 @@ uint8_t WriteSensorRegister(uint8_t address, uint8_t data)
 	if (!ack) {return 0;}
 	SoftI2CStop();											//Stop condition
 
-	return ack;
+	return 1;
 }
 
 uint8_t ReadSensorRegister(uint8_t address)
@@ -92,20 +87,13 @@ uint16_t ReadSensorCH1()
 	return value;
 }
 
-void SetSensorGain(uint8_t GAIN)
+uint8_t SetSensorControl(uint8_t GAIN_OR_ATIME)
 {
-	_GAIN = GAIN;
-
 	//Set sensor gain
-	WriteSensorRegister(SENSOR_COMMAND_BIT | SENSOR_REG_CONTROL, _GAIN | _ATIME);
-}
-
-void SetSensorATIME(uint8_t ATIME)
-{
-	_ATIME = ATIME;
-
-	//Set ADC integration time
-	WriteSensorRegister(SENSOR_REG_CONTROL, _GAIN | _ATIME);
+	SensorEnable();
+	uint8_t status = WriteSensorRegister(SENSOR_COMMAND_BIT | SENSOR_REG_CONTROL, GAIN_OR_ATIME);
+	SensorDisable();
+	return status;
 }
 
 /*

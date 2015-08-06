@@ -53,8 +53,7 @@ extern uint8_t SensorCommsAreWorking();
 extern uint8_t WriteSensorRegister(uint8_t address, uint8_t data);
 extern uint8_t ReadSensorRegister(uint8_t address);
 
-extern void SetSensorGain(uint8_t GAIN);
-extern void SetSensorATIME(uint8_t SENSOR_ATIME);
+extern uint8_t SetSensorControl(uint8_t GAIN_OR_ATIME);
 
 extern uint16_t ReadSensorCH0();
 extern uint16_t ReadSensorCH1();

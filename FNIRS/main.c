@@ -90,6 +90,7 @@ void SetLEDState(uint8_t LEDState, uint8_t LEDAddress)
 #define CMD_READ_CH1		0x55
 #define CMD_READ_Ee770		0x64
 #define CMD_READ_Ee940		0x65
+#define CMD_READ_EeBoth		0x66
 #define CMD_ADCCONFIG		0x41
 
 void RestartIntegTimer()
@@ -116,6 +117,8 @@ float GetIrradiance940()
 	return (12.3209 * ch1) - (6.3037 * ch0);
 }
 
+uint8_t _ATIME = SENSOR_ATIME_400ms;
+
 int main(void)
 {
 	//Initialize MCU
@@ -132,8 +135,9 @@ int main(void)
 		}
 	}
 
-	SetSensorGain(SENSOR_GAIN_MAX);
-	SetSensorATIME(SENSOR_ATIME_300ms);
+	SetSensorControl(SENSOR_GAIN_MAX | _ATIME);
+	SensorEnable();
+
 	SetLEDState(1, 0);
     SetLEDState(1, 1);
 
@@ -197,6 +201,25 @@ int main(void)
 			//Send the data to PC
 			usart_send(CMD_READ_Ee940);		//Send command back
 			usart_send_f((char*)&irrad940);
+		}
+		else if (nextByte == CMD_READ_EeBoth)
+		{
+			//Delay for the time it takes for sensor to get sample
+			for (int i = 0; i < _ATIME; i ++)
+			{
+				_delay_ms(100);
+			}
+
+			uint16_t ch0 = ReadSensorCH0();
+			uint16_t ch1 = ReadSensorCH1();
+
+			irrad770 = (3.5817 * ch0) - (4.7278 * ch1);
+			irrad940 = (12.3209 * ch1) - (6.3037 * ch0);
+
+			//Send the data to PC
+			usart_send(CMD_READ_EeBoth);		//Send command back
+			usart_send_f((char*)&irrad770);		//Send first float
+			usart_send_f((char*)&irrad940);		//Send second float
 		}
 	}
 }

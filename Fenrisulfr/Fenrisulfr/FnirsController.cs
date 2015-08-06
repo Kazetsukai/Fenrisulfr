@@ -18,7 +18,8 @@ namespace Fenrisulfr
         private readonly static byte[] RequestCH0CommandPacket = { 0x54 };
         private readonly static byte[] RequestCH1CommandPacket = { 0x55 };
         private readonly static byte[] RequestIrradiance770ValueCommandPacket = { 0x64 };
-        private readonly static byte[] RequestIrradiance940ValueCommandPacket = { 0x65 };  
+        private readonly static byte[] RequestIrradiance940ValueCommandPacket = { 0x65 };
+        private readonly static byte[] RequestIrradianceValuesCommandPacket =   { 0x66 }; 
         private readonly static byte[] ReturnData = new byte[5];
 
         private SerialPort _serialPort = new SerialPort(Properties.Settings.Default.DeviceCOMPort, 2000000, Parity.Even, 8, StopBits.One);
@@ -38,6 +39,9 @@ namespace Fenrisulfr
         float sensorValue940;
         float ch0;
         float ch1;
+        byte[] float770;
+        byte[] float940;
+        float[] irradianceValues;
 
         public void Reset()
         {
@@ -172,17 +176,17 @@ namespace Fenrisulfr
         void DoWork()
         {
             //Get sensor data
-            ch0 = RequestSensorCH0Value();    
-            ch1 = RequestSensorCH1Value();
+            //ch0 = RequestSensorCH0Value();
+            //ch1 = RequestSensorCH1Value();   
 
-            //Calculate irradiance values
-            //sensorValue770 = ((953f * ch0) - (1258f * ch1)) / 2029184f;
-            //sensorValue940 = ((6558f * ch1) - (3355f * ch0)) / 4058368f;
+            //sensorValue770 = RequestSensorIrradiance770();
+            //sensorValue940 = RequestSensorIrradiance940();
 
-            sensorValue770 = ch0;
-            sensorValue940 = ch1;
-
-            Thread.Sleep(5);
+            irradianceValues = RequestSensorIrradianceValues();
+            sensorValue770 = irradianceValues[0];
+            sensorValue940 = irradianceValues[1];
+            
+            //Thread.Sleep(5);
 
             //Console.WriteLine("770: " + sensorValue770.ToString());
             //Console.WriteLine("940: " + sensorValue940.ToString());
@@ -217,6 +221,26 @@ namespace Fenrisulfr
             {
                 throw new LEDStateChangeUnacknowledgedException("LED State change was requested by computer, but not acknowledged by device.");
             }
+        }
+
+        float[] RequestSensorIrradianceValues()
+        {
+            //Send the packet to device        
+            Send(RequestIrradianceValuesCommandPacket);
+
+            //Read value out            
+            byte[] data = Receive(9);
+
+            if (data[0] != RequestIrradianceValuesCommandPacket[0])
+            {
+                throw new Exception();
+            }
+
+            float770 = data.Skip(1).Take(4).ToArray();
+            float940 = data.Skip(5).Take(4).ToArray();
+
+            float[] output = {BitConverter.ToSingle(float770, 0), BitConverter.ToSingle(float940, 0) };
+            return output;
         }
 
         int RequestSensorCH0Value()
