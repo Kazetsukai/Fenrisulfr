@@ -64,6 +64,7 @@
             this.ch_FitPolyRegHb = new System.Windows.Forms.CheckBox();
             this.b_reset = new System.Windows.Forms.Button();
             this.p_options = new System.Windows.Forms.Panel();
+            this.b_ledsOnOff = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.t_polyRegOrder = new System.Windows.Forms.TextBox();
             this.ch_drawFFTHbO2 = new System.Windows.Forms.CheckBox();
@@ -123,7 +124,7 @@
             chartArea1.AxisX.ScaleView.MinSize = 10D;
             chartArea1.AxisX.ScaleView.MinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
             chartArea1.AxisX.ScaleView.SizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
-            chartArea1.AxisY.Minimum = 0D;
+            chartArea1.AxisY.Minimum = -100D;
             chartArea1.AxisY.ScaleView.MinSize = 0.0001D;
             chartArea1.AxisY.ScaleView.SmallScrollMinSize = 1E-05D;
             chartArea1.AxisY.ScaleView.SmallScrollMinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
@@ -363,6 +364,7 @@
             this.p_options.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.p_options.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.p_options.Controls.Add(this.b_ledsOnOff);
             this.p_options.Controls.Add(this.label2);
             this.p_options.Controls.Add(this.t_polyRegOrder);
             this.p_options.Controls.Add(this.ch_drawFFTHbO2);
@@ -383,6 +385,16 @@
             this.p_options.Name = "p_options";
             this.p_options.Size = new System.Drawing.Size(234, 599);
             this.p_options.TabIndex = 19;
+            // 
+            // b_ledsOnOff
+            // 
+            this.b_ledsOnOff.Location = new System.Drawing.Point(47, 209);
+            this.b_ledsOnOff.Name = "b_ledsOnOff";
+            this.b_ledsOnOff.Size = new System.Drawing.Size(108, 23);
+            this.b_ledsOnOff.TabIndex = 24;
+            this.b_ledsOnOff.Text = "Toggle LEDs";
+            this.b_ledsOnOff.UseVisualStyleBackColor = true;
+            this.b_ledsOnOff.Click += new System.EventHandler(this.b_ledsOnOff_Click);
             // 
             // label2
             // 
@@ -507,6 +519,7 @@
         private System.Windows.Forms.CheckBox ch_drawFFTHbO2;
         private System.Windows.Forms.TextBox t_polyRegOrder;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button b_ledsOnOff;
     }
 }
 

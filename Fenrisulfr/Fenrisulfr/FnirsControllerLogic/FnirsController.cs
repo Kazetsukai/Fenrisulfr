@@ -72,7 +72,15 @@ namespace Fenrisulfr.FnirsControllerLogic
             {
                 _readerThread = Task.Run(() =>
                 {
-                    _stopwatch.Start();  
+                    _stopwatch.Start();
+
+                    //Try 3 times to make sure leds turn on
+                    SetSensorLEDState(0, LEDState.On);
+                    SetSensorLEDState(0, LEDState.On);
+                    SetSensorLEDState(0, LEDState.On);
+                    SetSensorLEDState(1, LEDState.On);
+                    SetSensorLEDState(1, LEDState.On);
+                    SetSensorLEDState(1, LEDState.On);
 
                     while (!_stopping)
                     {
@@ -163,22 +171,17 @@ namespace Fenrisulfr.FnirsControllerLogic
                
         void DoWork()
         {
-            //Get sensor data
-            //ch0 = RequestSensorCH0Value();
-            //ch1 = RequestSensorCH1Value();   
-
-            //sensorValueHb = RequestSensorIrradianceHb();
-            //sensorValueHbO2 = RequestSensorIrradianceHbO2();
-
-            //irradianceValues = RequestSensorIrradianceValues();
-            //sensorValueHb = irradianceValues[0];
-            //sensorValueHbO2 = irradianceValues[1];                      
             Thread.Sleep(400);
             _results.Enqueue(new SensorResult { CH0 = RequestSensorCH0Value(), CH1 = RequestSensorCH1Value(), Milliseconds = (int)_stopwatch.ElapsedMilliseconds });
         }
 
         public void SetSensorLEDState(ushort address, LEDState state)
         {
+            if (GetState() == FnirsControllerState.Stopped)
+            {
+                _serialPort.Open();
+            } 
+
             SetLEDCommandPacket[0] = 0x4C;
             SetLEDCommandPacket[1] = 0;
             SetLEDCommandPacket[2] = 0;
@@ -203,6 +206,11 @@ namespace Fenrisulfr.FnirsControllerLogic
             {
                 throw new LEDStateChangeUnacknowledgedException("LED State change was requested by computer, but not acknowledged by device.");
             }
+
+            if (GetState() == FnirsControllerState.Stopped)
+            {
+                _serialPort.Close();
+            }           
         }
 
         private float[] RequestSensorIrradianceValues()

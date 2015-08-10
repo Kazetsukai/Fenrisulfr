@@ -159,7 +159,7 @@ int main(void)
 
 			//Apply the new state to the specified LED
 			SetLEDState(LEDState, LEDAddress);
-			RestartIntegTimer();	//Restart ADC
+			//RestartIntegTimer();	//Restart ADC
 
 			//Send acknowledgement to PC
 			usart_send(CMD_LEDSTATE);

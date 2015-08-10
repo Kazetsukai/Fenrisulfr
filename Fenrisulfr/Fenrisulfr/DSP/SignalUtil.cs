@@ -13,7 +13,7 @@ namespace Fenrisulfr.DSP
         {
             foreach (var v in data)
             {
-                yield return (3.5817 * v.CH0) - (4.7278 * v.CH1);
+                yield return (double)(((953 * v.CH0) - (1258 * v.CH1)) / 2029184);
             }
         }
 
@@ -21,7 +21,7 @@ namespace Fenrisulfr.DSP
         {
             foreach (var v in data)
             {
-                yield return (12.3209 * v.CH1) - (6.3037 * v.CH0);
+                yield return (double)(((6558 * v.CH1) - (3355 * v.CH0)) / 4058368);
             }
         }
 
@@ -32,7 +32,7 @@ namespace Fenrisulfr.DSP
                 var irrad770 = (3.5817 * v.CH0) - (4.7278 * v.CH1); 
                 var irrad940 = (12.3209 * v.CH1) - (6.3037 * v.CH0);
 
-                yield return irrad770 + (irrad940 * 0.52858493);        //Note: Hb and HbO2 are normalized to Hb under 770nm light (=1311.88)
+                yield return (double)(((15175 * irrad770) - (8125 * irrad940)) / 14273579);      
             }
         }
 
@@ -43,7 +43,7 @@ namespace Fenrisulfr.DSP
                 var irrad770 = (3.5817 * v.CH0) - (4.7278 * v.CH1);
                 var irrad940 = (12.3209 * v.CH1) - (6.3037 * v.CH0);
 
-                yield return (irrad770 * 0.49547215) + (irrad940 * 0.925389517);
+                yield return (double)(((32797 * irrad940) - (17336 * irrad770)) / 28547158);
             }
         }
 

@@ -198,10 +198,16 @@ namespace Fenrisulfr
 
             var Hb = SignalUtil.Hb(data).ToArray();
             var HbO2 = SignalUtil.HbO2(data).ToArray();
-                        
-            var avgHb = SignalUtil.RunningAverage(Hb, _runningAverageSamples).ToArray();
-            var avgHbO2 = SignalUtil.RunningAverage(HbO2, _runningAverageSamples).ToArray();
 
+            var irrad770 = SignalUtil.Irradiance770(data).ToArray();
+            var irrad940 = SignalUtil.Irradiance940(data).ToArray();
+
+            irrad770[0] += 0;
+            irrad940[0] += 0;
+
+            var avgHb =  SignalUtil.RunningAverage(Hb, _runningAverageSamples).ToArray();
+            var avgHbO2 = SignalUtil.RunningAverage(HbO2, _runningAverageSamples).ToArray();
+            
             //Clear the chart
             chartData.Series["S1_Hb"].Points.Clear();
             chartData.Series["S1_HbO2"].Points.Clear();
@@ -387,6 +393,24 @@ namespace Fenrisulfr
         private void FNIRS_FormClosing(object sender, FormClosingEventArgs e)
         {
             _controller.Stop(); 
+        }
+
+        bool _LEDsOn = true;
+        private void b_ledsOnOff_Click(object sender, EventArgs e)
+        {
+            _LEDsOn = !_LEDsOn;
+
+            if (_LEDsOn)
+            {
+                _controller.SetSensorLEDState(0, LEDState.On);
+                b_ledsOnOff.Text = "Turn LEDs off";
+            }
+
+            else
+            {
+                _controller.SetSensorLEDState(0, LEDState.Off);
+                b_ledsOnOff.Text = "Turn LEDs on";
+            }
         }        
     }
 }
