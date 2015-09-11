@@ -28,7 +28,7 @@ namespace Fenrisulfr
         private List<SensorResult> _trace = new List<SensorResult>();
         private DateTime _traceStart;
         
-        int _chartWidth = 10000;
+        int _chartWidth = 100000;
         bool _drawFFTHb = true;
         bool _drawFFTHbO2 = true;
         bool _fitPolyReg_Hb;
@@ -211,8 +211,8 @@ namespace Fenrisulfr
 
             var result = _trace[_trace.Count - 1];
             
-            var Hb = SignalUtil.Hb(data).ToArray();
-            var HbO2 = SignalUtil.HbO2(data).ToArray();
+            var Hb = SignalUtil.Power770(data).ToArray();
+            var HbO2 = SignalUtil.Power940(data).ToArray();
                         
             var avgHb =  SignalUtil.RunningAverage(Hb, _runningAverageSamples).ToArray();
             var avgHbO2 = SignalUtil.RunningAverage(HbO2, _runningAverageSamples).ToArray();
@@ -257,12 +257,12 @@ namespace Fenrisulfr
             {
                 using (var writer = new StreamWriter(saveFileDialog.OpenFile()))
                 {
-                    writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", "Milliseconds", "CH0", "CH1", "P770", "P940", "Hb", "HbO2");
+                    writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", "Milliseconds", "CH0", "CH1", "P770", "P940");
                     
                     foreach (var result in _trace)
                     {
                         
-                        writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", result.Milliseconds, result.CH0, result.CH1, SignalUtil.Power770(result.CH0, result.CH1), SignalUtil.Power940(result.CH0, result.CH1), SignalUtil.Hb(result.CH0, result.CH1), SignalUtil.HbO2(result.CH0, result.CH1));
+                        writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", result.Milliseconds, result.CH0, result.CH1, SignalUtil.Power770(result.CH0, result.CH1), SignalUtil.Power940(result.CH0, result.CH1));
                     }
                 }
             }
