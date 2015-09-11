@@ -14,13 +14,14 @@ namespace Fenrisulfr.FnirsControllerLogic
     public class FnirsController : IFnirsController
     {
         private readonly static byte[] SetLEDCommandPacket = { 0x4C, 0x00, 0x00 };
+        private readonly static byte[] SetADCConfigPacket = { 0x41, 0x00 };
         private readonly static byte[] RequestCH0CommandPacket = { 0x54 };
         private readonly static byte[] RequestCH1CommandPacket = { 0x55 };
         private readonly static byte[] RequestIrradianceHbValueCommandPacket = { 0x64 };
         private readonly static byte[] RequestIrradianceHbO2ValueCommandPacket = { 0x65 };
-        private readonly static byte[] RequestIrradianceValuesCommandPacket =   { 0x66 }; 
+        private readonly static byte[] RequestIrradianceValuesCommandPacket =   { 0x66 };        
         private readonly static byte[] ReturnData = new byte[5];
-
+                
         private SerialPort _serialPort = new SerialPort(Settings.Default.DeviceCOMPort, 2000000, Parity.Even, 8, StopBits.One);
         private ConcurrentQueue<SensorResult> _results = new ConcurrentQueue<SensorResult>();
         private Task _readerThread;
@@ -29,19 +30,14 @@ namespace Fenrisulfr.FnirsControllerLogic
         private FnirsControllerState _state = FnirsControllerState.Stopped;
 
         private int timeOfLastReceive;
-
-        private int _samplePeriod_ms = 100;
-
         private bool _serialPortBusy = false;
 
-        float sensorValueHb;
-        float sensorValueHbO2;
-        float ch0;
-        float ch1;
         byte[] floatHb;
         byte[] floatHbO2;
-        float[] irradianceValues;
 
+        ADCGain currentGain = ADCGain.x9876;
+        ADCIntegrationTime currentIntegTime = ADCIntegrationTime.IntegTime600ms;
+        
         public void Reset()
         {
             _stopwatch.Reset();
@@ -171,8 +167,15 @@ namespace Fenrisulfr.FnirsControllerLogic
                
         void DoWork()
         {
-            Thread.Sleep(400);
-            _results.Enqueue(new SensorResult { CH0 = RequestSensorCH0Value(), CH1 = RequestSensorCH1Value(), Milliseconds = (int)_stopwatch.ElapsedMilliseconds });
+            Thread.Sleep(((int)currentIntegTime + 1) * 50); 
+            SensorResult result = new SensorResult { CH0 = RequestSensorCH0Value(), CH1 = RequestSensorCH1Value(), Milliseconds = (int)_stopwatch.ElapsedMilliseconds };
+            
+            /*
+            Console.WriteLine("CH0: " + result.CH0.ToString());
+            Console.WriteLine("CH1: " + result.CH1.ToString());
+            Console.WriteLine();*/
+
+            _results.Enqueue(result);
         }
 
         public void SetSensorLEDState(ushort address, LEDState state)
@@ -213,6 +216,38 @@ namespace Fenrisulfr.FnirsControllerLogic
             }           
         }
 
+        public void SetSensorADCConfig(ADCGain newGain, ADCIntegrationTime newIntegTime)
+        {
+            if (GetState() == FnirsControllerState.Stopped)
+            {
+                _serialPort.Open();
+            } 
+
+            //Determine register value from desired gain and ATime value.
+            byte registerValue = (byte)(((byte)newGain << 4) | (byte)newIntegTime);
+
+            SetADCConfigPacket[1] = registerValue;
+
+            Send(SetADCConfigPacket);
+
+            //Get acknowledgement
+            byte[] ack = Receive(1);
+
+            if (ack[0] != SetADCConfigPacket[0])
+            {
+                throw new LEDStateChangeUnacknowledgedException("ADC config change was requested by computer, but not acknowledged by device.");
+            }
+
+            if (GetState() == FnirsControllerState.Stopped)
+            {
+                _serialPort.Close();
+            }           
+
+            //Record new settings locally
+            currentGain = newGain;
+            currentIntegTime = newIntegTime;
+        }
+        
         private float[] RequestSensorIrradianceValues()
         {
             //Send the packet to device        

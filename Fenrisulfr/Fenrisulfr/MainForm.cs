@@ -28,7 +28,7 @@ namespace Fenrisulfr
         private List<SensorResult> _trace = new List<SensorResult>();
         private DateTime _traceStart;
         
-        int _chartWidth = 100000;
+        int _chartWidth = 10000;
         bool _drawFFTHb = true;
         bool _drawFFTHbO2 = true;
         bool _fitPolyReg_Hb;
@@ -36,6 +36,8 @@ namespace Fenrisulfr
         int _polyRegOrder = 16;
         private int _samples = 10000;
         private int _runningAverageSamples = 1;
+
+        bool loaded;
 
         public FNIRS()
         {
@@ -48,8 +50,13 @@ namespace Fenrisulfr
             chartData.ChartAreas["ChartArea_Hb"].AxisY.ScaleView.Zoom(Settings.Default.ChartScaleViewMinYHb, 66000);//Properties.Settings.Default.ChartScaleViewMaxYHb);
             chartData.ChartAreas["ChartArea_HbO2"].AxisY.ScaleView.Zoom(Settings.Default.ChartScaleViewMinYHbO2, 66000);//Properties.Settings.Default.ChartScaleViewMaxYHbO2);
             
+            //Load default ADC config
+            c_gain.SelectedIndex = 3;
+            c_ATime.SelectedIndex = 5;
+
             //Initialize charts
             int borderWidth = 1;
+                      
 
             chartData.Series["S1_Hb"].Color = Color.DarkGreen;
             chartData.Series["S1_Hb"].BorderWidth = borderWidth;
@@ -92,7 +99,9 @@ namespace Fenrisulfr
             {
                 if (c_comportSelect.Items.Count > 0)
                     c_comportSelect.SelectedIndex = 0;
-            }         
+            }
+
+            loaded = true;
         }    
 
 
@@ -171,6 +180,12 @@ namespace Fenrisulfr
 
             UpdateChartData();
 
+            if (_trace.Count > 0)
+            {
+                t_CH0.Text = "CH0: " + _trace[_trace.Count - 1].CH0.ToString();
+                t_CH1.Text = "CH1: " + _trace[_trace.Count - 1].CH1.ToString();
+            }
+
             // Only let people save if there are samples to save
             if (_trace.Count == 0)
             {
@@ -191,20 +206,14 @@ namespace Fenrisulfr
             var end = start + _samples;
             if (start < 0) start = 0;
             var data = _trace.GetRange(start, end - start).ToArray();
-
+                        
             if (data.Length == 0) return;
 
             var result = _trace[_trace.Count - 1];
-
+            
             var Hb = SignalUtil.Hb(data).ToArray();
             var HbO2 = SignalUtil.HbO2(data).ToArray();
-
-            var irrad770 = SignalUtil.Irradiance770(data).ToArray();
-            var irrad940 = SignalUtil.Irradiance940(data).ToArray();
-
-            irrad770[0] += 0;
-            irrad940[0] += 0;
-
+                        
             var avgHb =  SignalUtil.RunningAverage(Hb, _runningAverageSamples).ToArray();
             var avgHbO2 = SignalUtil.RunningAverage(HbO2, _runningAverageSamples).ToArray();
             
@@ -248,10 +257,13 @@ namespace Fenrisulfr
             {
                 using (var writer = new StreamWriter(saveFileDialog.OpenFile()))
                 {
-                    writer.WriteLine("{0},{1},{2}", "Milliseconds", "Hb", "HbO2");
-
+                    writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", "Milliseconds", "CH0", "CH1", "P770", "P940", "Hb", "HbO2");
+                    
                     foreach (var result in _trace)
-                        writer.WriteLine("{0},{1},{2}", result.Milliseconds, result.CH0, result.CH1);
+                    {
+                        
+                        writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", result.Milliseconds, result.CH0, result.CH1, SignalUtil.Power770(result.CH0, result.CH1), SignalUtil.Power940(result.CH0, result.CH1), SignalUtil.Hb(result.CH0, result.CH1), SignalUtil.HbO2(result.CH0, result.CH1));
+                    }
                 }
             }
         }
@@ -411,6 +423,22 @@ namespace Fenrisulfr
                 _controller.SetSensorLEDState(0, LEDState.Off);
                 b_ledsOnOff.Text = "Turn LEDs on";
             }
+        }
+
+        private void c_gain_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (loaded)
+            {
+                _controller.SetSensorADCConfig((ADCGain)c_gain.SelectedIndex, (ADCIntegrationTime)c_ATime.SelectedIndex);
+            }  
+        }
+
+        private void c_ATime_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (loaded)
+            {
+                _controller.SetSensorADCConfig((ADCGain)c_gain.SelectedIndex, (ADCIntegrationTime)c_ATime.SelectedIndex);
+            }  
         }        
     }
 }

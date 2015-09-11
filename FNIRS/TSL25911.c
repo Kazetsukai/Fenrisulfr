@@ -90,9 +90,9 @@ uint16_t ReadSensorCH1()
 uint8_t SetSensorControl(uint8_t GAIN_OR_ATIME)
 {
 	//Set sensor gain
-	SensorEnable();
-	uint8_t status = WriteSensorRegister(SENSOR_COMMAND_BIT | SENSOR_REG_CONTROL, GAIN_OR_ATIME);
 	SensorDisable();
+	uint8_t status = WriteSensorRegister(SENSOR_COMMAND_BIT | SENSOR_REG_CONTROL, GAIN_OR_ATIME);
+	SensorEnable();
 	return status;
 }
 

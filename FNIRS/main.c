@@ -15,8 +15,7 @@
 //Define ports and pins
 #define LED_PCB				PB5
 #define LED770				PC0
-#define LED940_A				PC1
-#define LED940_B				PC2
+#define LED940_A			PC1
 
 //Define constants
 #define UART_BAUD_RATE		2000000
@@ -41,18 +40,20 @@ void Setup()
 {
 	//Set outputs
 	DDRB |= _BV(LED_PCB);
-	DDRC |= _BV(LED770) | _BV(LED940_A) | _BV(LED940_B);
-
-	//Initialize timer for counting ADC integration time
-	TCNT1 = 0;									//Set initial timer value
-	//TCCR1B |= _BV(CS10);						//Start timer with prescale clkI/O / 32
-	//OCR1A = 15960;								//Tuned to 1ms compmatch interrupt
-	//TIMSK1 |= _BV(OCIE1A);						//Start timer1 interrupt on compmatch with OCR1A (counts every ms)
+	DDRC |= _BV(LED770) | _BV(LED940_A);
 
 	//Initialize UART
 	usart_init(USART_BAUD_SELECT_DOUBLE_SPEED(UART_BAUD_RATE,F_CPU));
-
 	SensorInit();
+
+	//Initialize timer for counting ADC integration time
+	/*
+	TCCR0A |= _BV(WGM01);						//Set timer to CTC mode
+	OCR0A = 250;									//Tuned to 1ms compmatch interrupt
+	TIMSK0 |= _BV(OCIE0A);						//Start timer1 interrupt on compmatch with OCR1A (counts every ms)
+	sei();
+	TCCR0B |= _BV(CS00);						//Set prescale clkI/O (no prescale) and start timer
+	*/
 
 	sei();
 }
@@ -68,7 +69,6 @@ void SetLEDState(uint8_t LEDState, uint8_t LEDAddress)
 		if (LEDAddress == 1)
 		{
 			set(PORTC, LED940_A);
-			set(PORTC, LED940_B);
 		}
 	}
 	if (LEDState == 0)
@@ -80,7 +80,6 @@ void SetLEDState(uint8_t LEDState, uint8_t LEDAddress)
 		if (LEDAddress == 1)
 		{
 			clr(PORTC, LED940_A);
-			clr(PORTC, LED940_B);
 		}
 	}
 }
@@ -173,6 +172,8 @@ int main(void)
 			usart_send(data >> 8);
 			usart_send(data);
 
+			//usart_puts(itoa(data, 8, 10));
+			//usart_send('\n');usart_send('\r');
 		}
 
 		else if (nextByte == CMD_READ_CH1)
@@ -182,6 +183,8 @@ int main(void)
 			usart_send(CMD_READ_CH1);		//Send command back
 			usart_send(data >> 8);
 			usart_send(data);
+			//usart_puts(itoa(data, 8, 10));
+			//usart_send('\n');usart_send('\r');
 
 		}
 
@@ -221,20 +224,24 @@ int main(void)
 			usart_send_f((char*)&irrad770);		//Send first float
 			usart_send_f((char*)&irrad940);		//Send second float
 		}
+
+		//ADC config : 2 bytes. First is 0x41, next contains byte that can be transfered directly to the sensor control register
+		else if (nextByte == CMD_ADCCONFIG)
+		{
+			uint8_t gain_atime = usart_receive();
+			SetSensorControl(gain_atime);
+
+			//Send acknowledgement to PC
+			usart_send(CMD_ADCCONFIG);
+		}
 	}
 }
 
 
-ISR(TIMER1_COMPA_vect)
+ISR(TIMER0_COMPA_vect)
 {
 	TCNT1 = 0;
-	timerElapsed_ms++;
-
-	//Restart ADC when conversion time is reached
-	if (timerElapsed_ms >= integTime_ms)
-	{
-		RestartIntegTimer();
-	}
+	toggle(PORTC, LED770);
 }
 
 

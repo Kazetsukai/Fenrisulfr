@@ -55,6 +55,8 @@
     <Compile Include="Exceptions\ComputerSaysNoException.cs" />
     <Compile Include="Exceptions\LEDStateChangeUnacknowledgedException.cs" />
     <Compile Include="DSP\GTFOTheMainForm.cs" />
+    <Compile Include="FnirsControllerLogic\ADCIntegrationTime.cs" />
+    <Compile Include="FnirsControllerLogic\ADCGain.cs" />
     <Compile Include="FnirsControllerLogic\FakeFnirs.cs" />
     <Compile Include="FnirsControllerLogic\FnirsControllerState.cs" />
     <Compile Include="FnirsControllerLogic\IFnirsController.cs" />

@@ -64,6 +64,10 @@
             this.ch_FitPolyRegHb = new System.Windows.Forms.CheckBox();
             this.b_reset = new System.Windows.Forms.Button();
             this.p_options = new System.Windows.Forms.Panel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.c_gain = new System.Windows.Forms.ComboBox();
+            this.c_ATime = new System.Windows.Forms.ComboBox();
             this.b_ledsOnOff = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.t_polyRegOrder = new System.Windows.Forms.TextBox();
@@ -71,6 +75,8 @@
             this.ch_drawFFTHb = new System.Windows.Forms.CheckBox();
             this.ch_FitPolyRegHbO2 = new System.Windows.Forms.CheckBox();
             this.splitpanel_charts = new System.Windows.Forms.SplitContainer();
+            this.t_CH0 = new System.Windows.Forms.Label();
+            this.t_CH1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.chartData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartFFT)).BeginInit();
             this.p_options.SuspendLayout();
@@ -88,7 +94,7 @@
             // 
             // b_StartStop
             // 
-            this.b_StartStop.Location = new System.Drawing.Point(17, 99);
+            this.b_StartStop.Location = new System.Drawing.Point(22, 145);
             this.b_StartStop.Name = "b_StartStop";
             this.b_StartStop.Size = new System.Drawing.Size(83, 25);
             this.b_StartStop.TabIndex = 4;
@@ -124,7 +130,6 @@
             chartArea1.AxisX.ScaleView.MinSize = 10D;
             chartArea1.AxisX.ScaleView.MinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
             chartArea1.AxisX.ScaleView.SizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
-            chartArea1.AxisY.Minimum = -100D;
             chartArea1.AxisY.ScaleView.MinSize = 0.0001D;
             chartArea1.AxisY.ScaleView.SmallScrollMinSize = 1E-05D;
             chartArea1.AxisY.ScaleView.SmallScrollMinSizeType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Number;
@@ -137,7 +142,6 @@
             chartArea1.CursorY.IsUserSelectionEnabled = true;
             chartArea1.CursorY.LineColor = System.Drawing.Color.White;
             chartArea1.Name = "ChartArea_Hb";
-            chartArea2.AxisY.Minimum = 0D;
             chartArea2.AxisY.ScaleView.MinSize = 0.0001D;
             chartArea2.AxisY.ScaleView.SmallScrollMinSize = 0.0001D;
             chartArea2.AxisY.ScaleView.SmallScrollSize = 1D;
@@ -179,7 +183,7 @@
             this.chartData.Series.Add(series2);
             this.chartData.Series.Add(series3);
             this.chartData.Series.Add(series4);
-            this.chartData.Size = new System.Drawing.Size(705, 592);
+            this.chartData.Size = new System.Drawing.Size(977, 592);
             this.chartData.TabIndex = 9;
             this.chartData.Text = "chart";
             title1.Alignment = System.Drawing.ContentAlignment.TopCenter;
@@ -200,7 +204,7 @@
             // l_samples
             // 
             this.l_samples.AutoSize = true;
-            this.l_samples.Location = new System.Drawing.Point(4, 351);
+            this.l_samples.Location = new System.Drawing.Point(14, 431);
             this.l_samples.Name = "l_samples";
             this.l_samples.Size = new System.Drawing.Size(105, 13);
             this.l_samples.TabIndex = 10;
@@ -209,7 +213,7 @@
             // b_SaveTrace
             // 
             this.b_SaveTrace.Enabled = false;
-            this.b_SaveTrace.Location = new System.Drawing.Point(128, 99);
+            this.b_SaveTrace.Location = new System.Drawing.Point(128, 145);
             this.b_SaveTrace.Name = "b_SaveTrace";
             this.b_SaveTrace.Size = new System.Drawing.Size(83, 25);
             this.b_SaveTrace.TabIndex = 11;
@@ -224,6 +228,7 @@
             // 
             // c_comportSelect
             // 
+            this.c_comportSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.c_comportSelect.FormattingEnabled = true;
             this.c_comportSelect.Location = new System.Drawing.Point(128, 29);
             this.c_comportSelect.Name = "c_comportSelect";
@@ -293,7 +298,7 @@
             this.chartFFT.Series.Add(series6);
             this.chartFFT.Series.Add(series7);
             this.chartFFT.Series.Add(series8);
-            this.chartFFT.Size = new System.Drawing.Size(297, 589);
+            this.chartFFT.Size = new System.Drawing.Size(25, 589);
             this.chartFFT.TabIndex = 14;
             this.chartFFT.Text = "chart1";
             title3.Alignment = System.Drawing.ContentAlignment.BottomCenter;
@@ -316,6 +321,7 @@
             title4.TextOrientation = System.Windows.Forms.DataVisualization.Charting.TextOrientation.Rotated270;
             this.chartFFT.Titles.Add(title3);
             this.chartFFT.Titles.Add(title4);
+            this.chartFFT.Visible = false;
             // 
             // t_windowSize
             // 
@@ -341,17 +347,18 @@
             // ch_FitPolyRegHb
             // 
             this.ch_FitPolyRegHb.AutoSize = true;
-            this.ch_FitPolyRegHb.Location = new System.Drawing.Point(4, 465);
+            this.ch_FitPolyRegHb.Location = new System.Drawing.Point(14, 545);
             this.ch_FitPolyRegHb.Name = "ch_FitPolyRegHb";
             this.ch_FitPolyRegHb.Size = new System.Drawing.Size(130, 17);
             this.ch_FitPolyRegHb.TabIndex = 17;
             this.ch_FitPolyRegHb.Text = "Fit polynomial reg (Hb)";
             this.ch_FitPolyRegHb.UseVisualStyleBackColor = true;
+            this.ch_FitPolyRegHb.Visible = false;
             this.ch_FitPolyRegHb.CheckedChanged += new System.EventHandler(this.ch_bestFitLineHb_CheckedChanged);
             // 
             // b_reset
             // 
-            this.b_reset.Location = new System.Drawing.Point(72, 130);
+            this.b_reset.Location = new System.Drawing.Point(22, 176);
             this.b_reset.Name = "b_reset";
             this.b_reset.Size = new System.Drawing.Size(83, 25);
             this.b_reset.TabIndex = 18;
@@ -364,6 +371,12 @@
             this.p_options.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.p_options.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.p_options.Controls.Add(this.t_CH1);
+            this.p_options.Controls.Add(this.t_CH0);
+            this.p_options.Controls.Add(this.label4);
+            this.p_options.Controls.Add(this.label3);
+            this.p_options.Controls.Add(this.c_gain);
+            this.p_options.Controls.Add(this.c_ATime);
             this.p_options.Controls.Add(this.b_ledsOnOff);
             this.p_options.Controls.Add(this.label2);
             this.p_options.Controls.Add(this.t_polyRegOrder);
@@ -386,11 +399,63 @@
             this.p_options.Size = new System.Drawing.Size(234, 599);
             this.p_options.TabIndex = 19;
             // 
+            // label4
+            // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(14, 112);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(32, 13);
+            this.label4.TabIndex = 28;
+            this.label4.Text = "Gain:";
+            // 
+            // label3
+            // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(14, 85);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(82, 13);
+            this.label3.TabIndex = 27;
+            this.label3.Text = "Integration time:";
+            // 
+            // c_gain
+            // 
+            this.c_gain.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.c_gain.FormattingEnabled = true;
+            this.c_gain.Items.AddRange(new object[] {
+            "x1",
+            "x25",
+            "x428",
+            "x9876"});
+            this.c_gain.Location = new System.Drawing.Point(128, 109);
+            this.c_gain.Name = "c_gain";
+            this.c_gain.Size = new System.Drawing.Size(83, 21);
+            this.c_gain.TabIndex = 26;
+            this.c_gain.SelectedIndexChanged += new System.EventHandler(this.c_gain_SelectedIndexChanged);
+            // 
+            // c_ATime
+            // 
+            this.c_ATime.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.c_ATime.FormattingEnabled = true;
+            this.c_ATime.Items.AddRange(new object[] {
+            "100 ms",
+            "200 ms",
+            "300 ms",
+            "400 ms",
+            "500 ms",
+            "600 ms"});
+            this.c_ATime.Location = new System.Drawing.Point(128, 82);
+            this.c_ATime.Name = "c_ATime";
+            this.c_ATime.Size = new System.Drawing.Size(83, 21);
+            this.c_ATime.TabIndex = 25;
+            this.c_ATime.SelectedIndexChanged += new System.EventHandler(this.c_ATime_SelectedIndexChanged);
+            // 
             // b_ledsOnOff
             // 
-            this.b_ledsOnOff.Location = new System.Drawing.Point(47, 209);
+            this.b_ledsOnOff.Location = new System.Drawing.Point(128, 178);
             this.b_ledsOnOff.Name = "b_ledsOnOff";
-            this.b_ledsOnOff.Size = new System.Drawing.Size(108, 23);
+            this.b_ledsOnOff.Size = new System.Drawing.Size(83, 23);
             this.b_ledsOnOff.TabIndex = 24;
             this.b_ledsOnOff.Text = "Toggle LEDs";
             this.b_ledsOnOff.UseVisualStyleBackColor = true;
@@ -399,54 +464,59 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(1, 442);
+            this.label2.Location = new System.Drawing.Point(11, 522);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(108, 13);
             this.label2.TabIndex = 23;
             this.label2.Text = "Polynomial reg. order:";
+            this.label2.Visible = false;
             // 
             // t_polyRegOrder
             // 
             this.t_polyRegOrder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.t_polyRegOrder.Location = new System.Drawing.Point(125, 439);
+            this.t_polyRegOrder.Location = new System.Drawing.Point(135, 519);
             this.t_polyRegOrder.Name = "t_polyRegOrder";
             this.t_polyRegOrder.Size = new System.Drawing.Size(83, 20);
             this.t_polyRegOrder.TabIndex = 22;
             this.t_polyRegOrder.Text = "16";
+            this.t_polyRegOrder.Visible = false;
             this.t_polyRegOrder.TextChanged += new System.EventHandler(this.t_polyRegOrder_TextChanged);
             // 
             // ch_drawFFTHbO2
             // 
             this.ch_drawFFTHbO2.AutoSize = true;
-            this.ch_drawFFTHbO2.Location = new System.Drawing.Point(4, 403);
+            this.ch_drawFFTHbO2.Location = new System.Drawing.Point(14, 483);
             this.ch_drawFFTHbO2.Name = "ch_drawFFTHbO2";
             this.ch_drawFFTHbO2.Size = new System.Drawing.Size(110, 17);
             this.ch_drawFFTHbO2.TabIndex = 21;
             this.ch_drawFFTHbO2.Text = "Draw FFT (HbO2)";
             this.ch_drawFFTHbO2.UseVisualStyleBackColor = true;
+            this.ch_drawFFTHbO2.Visible = false;
             this.ch_drawFFTHbO2.CheckedChanged += new System.EventHandler(this.ch_drawFFTHbO2_CheckedChanged);
             // 
             // ch_drawFFTHb
             // 
             this.ch_drawFFTHb.AutoSize = true;
-            this.ch_drawFFTHb.Location = new System.Drawing.Point(4, 380);
+            this.ch_drawFFTHb.Location = new System.Drawing.Point(14, 460);
             this.ch_drawFFTHb.Name = "ch_drawFFTHb";
             this.ch_drawFFTHb.Size = new System.Drawing.Size(96, 17);
             this.ch_drawFFTHb.TabIndex = 20;
             this.ch_drawFFTHb.Text = "Draw FFT (Hb)";
             this.ch_drawFFTHb.UseVisualStyleBackColor = true;
+            this.ch_drawFFTHb.Visible = false;
             this.ch_drawFFTHb.CheckedChanged += new System.EventHandler(this.ch_drawFFTHb_CheckedChanged);
             // 
             // ch_FitPolyRegHbO2
             // 
             this.ch_FitPolyRegHbO2.AutoSize = true;
-            this.ch_FitPolyRegHbO2.Location = new System.Drawing.Point(4, 488);
+            this.ch_FitPolyRegHbO2.Location = new System.Drawing.Point(14, 568);
             this.ch_FitPolyRegHbO2.Name = "ch_FitPolyRegHbO2";
             this.ch_FitPolyRegHbO2.Size = new System.Drawing.Size(144, 17);
             this.ch_FitPolyRegHbO2.TabIndex = 19;
             this.ch_FitPolyRegHbO2.Text = "Fit polynomial reg (HbO2)";
             this.ch_FitPolyRegHbO2.UseVisualStyleBackColor = true;
+            this.ch_FitPolyRegHbO2.Visible = false;
             this.ch_FitPolyRegHbO2.CheckedChanged += new System.EventHandler(this.ch_FitPolyRegHbO2_CheckedChanged);
             // 
             // splitpanel_charts
@@ -466,8 +536,28 @@
             // 
             this.splitpanel_charts.Panel2.Controls.Add(this.chartFFT);
             this.splitpanel_charts.Size = new System.Drawing.Size(1026, 599);
-            this.splitpanel_charts.SplitterDistance = 715;
+            this.splitpanel_charts.SplitterDistance = 987;
             this.splitpanel_charts.TabIndex = 20;
+            // 
+            // t_CH0
+            // 
+            this.t_CH0.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.t_CH0.AutoSize = true;
+            this.t_CH0.Location = new System.Drawing.Point(19, 255);
+            this.t_CH0.Name = "t_CH0";
+            this.t_CH0.Size = new System.Drawing.Size(31, 13);
+            this.t_CH0.TabIndex = 29;
+            this.t_CH0.Text = "CH0:";
+            // 
+            // t_CH1
+            // 
+            this.t_CH1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.t_CH1.AutoSize = true;
+            this.t_CH1.Location = new System.Drawing.Point(19, 278);
+            this.t_CH1.Name = "t_CH1";
+            this.t_CH1.Size = new System.Drawing.Size(31, 13);
+            this.t_CH1.TabIndex = 30;
+            this.t_CH1.Text = "CH1:";
             // 
             // FNIRS
             // 
@@ -520,6 +610,12 @@
         private System.Windows.Forms.TextBox t_polyRegOrder;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button b_ledsOnOff;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox c_gain;
+        private System.Windows.Forms.ComboBox c_ATime;
+        private System.Windows.Forms.Label t_CH1;
+        private System.Windows.Forms.Label t_CH0;
     }
 }
 

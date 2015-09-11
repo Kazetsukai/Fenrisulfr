@@ -16,5 +16,6 @@ namespace Fenrisulfr.FnirsControllerLogic
         SensorResult GetNextResult();
 
         void SetSensorLEDState(ushort address, LEDState state);
+        void SetSensorADCConfig(ADCGain newGain, ADCIntegrationTime newIntegTime);
     }
 }

@@ -104,5 +104,10 @@ namespace Fenrisulfr.FnirsControllerLogic
         {
             throw new NotImplementedException();
         }
+
+        public void SetSensorADCConfig(ADCGain newGain, ADCIntegrationTime newIntegTime)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
