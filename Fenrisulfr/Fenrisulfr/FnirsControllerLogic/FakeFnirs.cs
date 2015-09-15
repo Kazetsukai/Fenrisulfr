@@ -14,7 +14,7 @@ namespace Fenrisulfr.FnirsControllerLogic
         private Stopwatch _stopwatch = new Stopwatch();
         private bool _stopping = false;
         private FnirsControllerState _state = FnirsControllerState.Stopped;
-
+             
         public void Reset()
         {
             

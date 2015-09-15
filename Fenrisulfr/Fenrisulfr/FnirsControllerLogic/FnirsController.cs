@@ -37,7 +37,7 @@ namespace Fenrisulfr.FnirsControllerLogic
 
         ADCGain currentGain = ADCGain.x9876;
         ADCIntegrationTime currentIntegTime = ADCIntegrationTime.IntegTime600ms;
-        
+               
         public void Reset()
         {
             _stopwatch.Reset();

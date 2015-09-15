@@ -48,6 +48,13 @@
             System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Title title3 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.Windows.Forms.DataVisualization.Charting.Title title4 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series9 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint5 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, "0,0");
+            System.Windows.Forms.DataVisualization.Charting.Series series10 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint6 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, 0D);
+            System.Windows.Forms.DataVisualization.Charting.Title title5 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.Title title6 = new System.Windows.Forms.DataVisualization.Charting.Title();
             this.UI_UpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.b_StartStop = new System.Windows.Forms.Button();
             this.t_sampleRate = new System.Windows.Forms.TextBox();
@@ -64,6 +71,10 @@
             this.ch_FitPolyRegHb = new System.Windows.Forms.CheckBox();
             this.b_reset = new System.Windows.Forms.Button();
             this.p_options = new System.Windows.Forms.Panel();
+            this.n_fft_track_freq = new System.Windows.Forms.NumericUpDown();
+            this.label5 = new System.Windows.Forms.Label();
+            this.t_CH1 = new System.Windows.Forms.Label();
+            this.t_CH0 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.c_gain = new System.Windows.Forms.ComboBox();
@@ -75,15 +86,16 @@
             this.ch_drawFFTHb = new System.Windows.Forms.CheckBox();
             this.ch_FitPolyRegHbO2 = new System.Windows.Forms.CheckBox();
             this.splitpanel_charts = new System.Windows.Forms.SplitContainer();
-            this.t_CH0 = new System.Windows.Forms.Label();
-            this.t_CH1 = new System.Windows.Forms.Label();
+            this.chart_FFT_tracker = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.chartData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartFFT)).BeginInit();
             this.p_options.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.n_fft_track_freq)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitpanel_charts)).BeginInit();
             this.splitpanel_charts.Panel1.SuspendLayout();
             this.splitpanel_charts.Panel2.SuspendLayout();
             this.splitpanel_charts.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chart_FFT_tracker)).BeginInit();
             this.SuspendLayout();
             // 
             // UI_UpdateTimer
@@ -183,7 +195,7 @@
             this.chartData.Series.Add(series2);
             this.chartData.Series.Add(series3);
             this.chartData.Series.Add(series4);
-            this.chartData.Size = new System.Drawing.Size(977, 592);
+            this.chartData.Size = new System.Drawing.Size(613, 592);
             this.chartData.TabIndex = 9;
             this.chartData.Text = "chart";
             title1.Alignment = System.Drawing.ContentAlignment.TopCenter;
@@ -298,7 +310,7 @@
             this.chartFFT.Series.Add(series6);
             this.chartFFT.Series.Add(series7);
             this.chartFFT.Series.Add(series8);
-            this.chartFFT.Size = new System.Drawing.Size(25, 589);
+            this.chartFFT.Size = new System.Drawing.Size(389, 229);
             this.chartFFT.TabIndex = 14;
             this.chartFFT.Text = "chart1";
             title3.Alignment = System.Drawing.ContentAlignment.BottomCenter;
@@ -321,7 +333,6 @@
             title4.TextOrientation = System.Windows.Forms.DataVisualization.Charting.TextOrientation.Rotated270;
             this.chartFFT.Titles.Add(title3);
             this.chartFFT.Titles.Add(title4);
-            this.chartFFT.Visible = false;
             // 
             // t_windowSize
             // 
@@ -371,6 +382,8 @@
             this.p_options.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.p_options.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.p_options.Controls.Add(this.n_fft_track_freq);
+            this.p_options.Controls.Add(this.label5);
             this.p_options.Controls.Add(this.t_CH1);
             this.p_options.Controls.Add(this.t_CH0);
             this.p_options.Controls.Add(this.label4);
@@ -398,6 +411,54 @@
             this.p_options.Name = "p_options";
             this.p_options.Size = new System.Drawing.Size(234, 599);
             this.p_options.TabIndex = 19;
+            // 
+            // n_fft_track_freq
+            // 
+            this.n_fft_track_freq.DecimalPlaces = 3;
+            this.n_fft_track_freq.Increment = new decimal(new int[] {
+            5,
+            0,
+            0,
+            196608});
+            this.n_fft_track_freq.Location = new System.Drawing.Point(159, 302);
+            this.n_fft_track_freq.Name = "n_fft_track_freq";
+            this.n_fft_track_freq.Size = new System.Drawing.Size(68, 20);
+            this.n_fft_track_freq.TabIndex = 33;
+            this.n_fft_track_freq.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            // 
+            // label5
+            // 
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(19, 304);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(135, 13);
+            this.label5.TabIndex = 32;
+            this.label5.Text = "FFT Track Frequency (Hz):";
+            // 
+            // t_CH1
+            // 
+            this.t_CH1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.t_CH1.AutoSize = true;
+            this.t_CH1.Location = new System.Drawing.Point(19, 278);
+            this.t_CH1.Name = "t_CH1";
+            this.t_CH1.Size = new System.Drawing.Size(31, 13);
+            this.t_CH1.TabIndex = 30;
+            this.t_CH1.Text = "CH1:";
+            // 
+            // t_CH0
+            // 
+            this.t_CH0.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.t_CH0.AutoSize = true;
+            this.t_CH0.Location = new System.Drawing.Point(19, 255);
+            this.t_CH0.Name = "t_CH0";
+            this.t_CH0.Size = new System.Drawing.Size(31, 13);
+            this.t_CH0.TabIndex = 29;
+            this.t_CH0.Text = "CH0:";
             // 
             // label4
             // 
@@ -534,30 +595,74 @@
             // 
             // splitpanel_charts.Panel2
             // 
+            this.splitpanel_charts.Panel2.Controls.Add(this.chart_FFT_tracker);
             this.splitpanel_charts.Panel2.Controls.Add(this.chartFFT);
             this.splitpanel_charts.Size = new System.Drawing.Size(1026, 599);
-            this.splitpanel_charts.SplitterDistance = 987;
+            this.splitpanel_charts.SplitterDistance = 623;
             this.splitpanel_charts.TabIndex = 20;
             // 
-            // t_CH0
+            // chart_FFT_tracker
             // 
-            this.t_CH0.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.t_CH0.AutoSize = true;
-            this.t_CH0.Location = new System.Drawing.Point(19, 255);
-            this.t_CH0.Name = "t_CH0";
-            this.t_CH0.Size = new System.Drawing.Size(31, 13);
-            this.t_CH0.TabIndex = 29;
-            this.t_CH0.Text = "CH0:";
-            // 
-            // t_CH1
-            // 
-            this.t_CH1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.t_CH1.AutoSize = true;
-            this.t_CH1.Location = new System.Drawing.Point(19, 278);
-            this.t_CH1.Name = "t_CH1";
-            this.t_CH1.Size = new System.Drawing.Size(31, 13);
-            this.t_CH1.TabIndex = 30;
-            this.t_CH1.Text = "CH1:";
+            this.chart_FFT_tracker.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.chart_FFT_tracker.BackColor = System.Drawing.Color.Transparent;
+            chartArea4.AxisX.MajorGrid.Interval = 1D;
+            chartArea4.AxisX.MinorGrid.Enabled = true;
+            chartArea4.AxisX.MinorGrid.Interval = 0.1D;
+            chartArea4.AxisX.MinorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dash;
+            chartArea4.AxisX.MinorTickMark.Enabled = true;
+            chartArea4.AxisX.MinorTickMark.Interval = 0.1D;
+            chartArea4.AxisX.ScrollBar.Size = 18D;
+            chartArea4.AxisX2.MinorGrid.Enabled = true;
+            chartArea4.AxisX2.ScrollBar.Size = 18D;
+            chartArea4.AxisY.Maximum = 2000D;
+            chartArea4.AxisY.Minimum = 0D;
+            chartArea4.BackColor = System.Drawing.Color.Transparent;
+            chartArea4.CursorX.Interval = 1E-05D;
+            chartArea4.CursorX.IsUserEnabled = true;
+            chartArea4.CursorX.IsUserSelectionEnabled = true;
+            chartArea4.CursorX.LineColor = System.Drawing.Color.White;
+            chartArea4.CursorY.IsUserEnabled = true;
+            chartArea4.CursorY.IsUserSelectionEnabled = true;
+            chartArea4.Name = "ChartArea";
+            this.chart_FFT_tracker.ChartAreas.Add(chartArea4);
+            this.chart_FFT_tracker.Location = new System.Drawing.Point(3, 238);
+            this.chart_FFT_tracker.Name = "chart_FFT_tracker";
+            series9.ChartArea = "ChartArea";
+            series9.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series9.Name = "S1_FFT_Track_Hb";
+            series9.Points.Add(dataPoint5);
+            series9.YValuesPerPoint = 2;
+            series10.ChartArea = "ChartArea";
+            series10.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series10.Name = "S1_FFT_Track_HbO2";
+            series10.Points.Add(dataPoint6);
+            this.chart_FFT_tracker.Series.Add(series9);
+            this.chart_FFT_tracker.Series.Add(series10);
+            this.chart_FFT_tracker.Size = new System.Drawing.Size(389, 354);
+            this.chart_FFT_tracker.TabIndex = 15;
+            this.chart_FFT_tracker.Text = "chart1";
+            title5.Alignment = System.Drawing.ContentAlignment.BottomCenter;
+            title5.DockedToChartArea = "ChartArea";
+            title5.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Bottom;
+            title5.IsDockedInsideChartArea = false;
+            title5.Name = "Time (ms)";
+            title5.Text = "Time (ms)";
+            title6.Alignment = System.Drawing.ContentAlignment.TopLeft;
+            title6.DockedToChartArea = "ChartArea";
+            title6.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Left;
+            title6.IsDockedInsideChartArea = false;
+            title6.Name = "Magnitude";
+            title6.Position.Auto = false;
+            title6.Position.Height = 82.34804F;
+            title6.Position.Width = 1.989058F;
+            title6.Position.X = 2F;
+            title6.Position.Y = 1F;
+            title6.Text = "Magnitude";
+            title6.TextOrientation = System.Windows.Forms.DataVisualization.Charting.TextOrientation.Rotated270;
+            this.chart_FFT_tracker.Titles.Add(title5);
+            this.chart_FFT_tracker.Titles.Add(title6);
             // 
             // FNIRS
             // 
@@ -577,10 +682,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.chartFFT)).EndInit();
             this.p_options.ResumeLayout(false);
             this.p_options.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.n_fft_track_freq)).EndInit();
             this.splitpanel_charts.Panel1.ResumeLayout(false);
             this.splitpanel_charts.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitpanel_charts)).EndInit();
             this.splitpanel_charts.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.chart_FFT_tracker)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -616,6 +723,9 @@
         private System.Windows.Forms.ComboBox c_ATime;
         private System.Windows.Forms.Label t_CH1;
         private System.Windows.Forms.Label t_CH0;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chart_FFT_tracker;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.NumericUpDown n_fft_track_freq;
     }
 }
 

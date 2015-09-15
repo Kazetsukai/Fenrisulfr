@@ -1,9 +1,11 @@
 ﻿using Fenrisulfr.FnirsControllerLogic;
+using MathNet.Numerics.Transformations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace Fenrisulfr.DSP
 {
@@ -77,6 +79,30 @@ namespace Fenrisulfr.DSP
                 while (relevantPoints.Count > windowSize) relevantPoints.Dequeue();
                 yield return relevantPoints.Sum() / relevantPoints.Count;
             }
-        }       
+        }
+
+        public static IEnumerable<DataPoint> GetSeriesFFT(double[] dataYValues, double sampleRate)
+        {
+            //Populate data
+            int windowSize = dataYValues.Length;           
+
+            //Calculate distance between frequencies on FFT plot
+            double freqBinWidth = sampleRate / windowSize;
+
+            //Calculate real and imag parts of frequency. Output of FFT for real data is mirror imaged, so there will be (2 * windowSize) elements in freqReal[] and freqImag[]
+            double[] freqReal, freqImag;
+            RealFourierTransformation rft = new RealFourierTransformation();
+            rft.TransformForward(dataYValues, out freqReal, out freqImag);
+
+            //We only take first half of data (windowSize = half of freqReal[] size)
+            for (int i = 0; i < windowSize / 2; i++)
+            {
+                double magnitude = Math.Sqrt((freqReal[i] * freqReal[i]) + (freqImag[i] * freqImag[i]));
+                double freq = i * freqBinWidth / 2;
+
+                yield return new DataPoint(freq, magnitude);
+                //Console.WriteLine(freqReal[i] + "\t" + freqImag[i]);
+            }            
+        }
     }
 }

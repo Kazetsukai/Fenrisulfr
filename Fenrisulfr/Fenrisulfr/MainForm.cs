@@ -56,31 +56,30 @@ namespace Fenrisulfr
 
             //Initialize charts
             int borderWidth = 1;
-                      
 
-            chartData.Series["S1_Hb"].Color = Color.DarkGreen;
+            chartData.Series["S1_Hb"].Color = Color.DarkRed;
             chartData.Series["S1_Hb"].BorderWidth = borderWidth;
             chartData.Series["S1_Hb"].BorderDashStyle = ChartDashStyle.Dot;
 
-            chartData.Series["S1_HbO2"].Color = Color.DarkRed;
+            chartData.Series["S1_HbO2"].Color = Color.DarkGreen;
             chartData.Series["S1_HbO2"].BorderWidth = borderWidth;
             chartData.Series["S1_HbO2"].BorderDashStyle = ChartDashStyle.Dot;
 
-            chartData.Series["S1_Hb_RunAvg"].Color = Color.Green;
+            chartData.Series["S1_Hb_RunAvg"].Color = Color.Red;
             chartData.Series["S1_Hb_RunAvg"].BorderWidth = borderWidth;
 
-            chartData.Series["S1_HbO2_RunAvg"].Color = Color.Red;            
+            chartData.Series["S1_HbO2_RunAvg"].Color = Color.Green;            
             chartData.Series["S1_HbO2_RunAvg"].BorderWidth = borderWidth;
 
             chartData.ChartAreas["ChartArea_Hb"].AxisX.ScaleView.Zoomable = true;
             chartData.ChartAreas["ChartArea_HbO2"].AxisX.ScaleView.Zoomable = true;
 
-            chartFFT.Series["S1_Hb_FFT"].Color = Color.DarkGreen;
-            chartFFT.Series["S1_HbO2_FFT"].Color = Color.DarkRed;
+            chartFFT.Series["S1_Hb_FFT"].Color = Color.DarkRed;
+            chartFFT.Series["S1_HbO2_FFT"].Color = Color.DarkGreen;
             chartFFT.Series["S1_Hb_FFT"].BorderWidth = borderWidth;
             chartFFT.Series["S1_HbO2_FFT"].BorderWidth = borderWidth;
             chartFFT.ChartAreas["ChartArea"].AxisX.ScaleView.Zoomable = true;
-
+            
             //Populate comport select combo box
             string[] availablePorts = SerialPort.GetPortNames();
 
@@ -197,7 +196,7 @@ namespace Fenrisulfr
                 b_SaveTrace.Enabled = true;
                 var milliseconds = (_trace[_trace.Count - 1].Milliseconds - _trace[0].Milliseconds);
                 l_samples.Text = _trace.Count + " samples collected - " + milliseconds + " milliseconds of data";
-            }
+            }            
         }
 
         private void UpdateChartData()
@@ -210,10 +209,10 @@ namespace Fenrisulfr
             if (data.Length == 0) return;
 
             var result = _trace[_trace.Count - 1];
-            
+
             var Hb = SignalUtil.Power770(data).ToArray();
             var HbO2 = SignalUtil.Power940(data).ToArray();
-                        
+            
             var avgHb =  SignalUtil.RunningAverage(Hb, _runningAverageSamples).ToArray();
             var avgHbO2 = SignalUtil.RunningAverage(HbO2, _runningAverageSamples).ToArray();
             
@@ -222,6 +221,10 @@ namespace Fenrisulfr
             chartData.Series["S1_HbO2"].Points.Clear();
             chartData.Series["S1_Hb_RunAvg"].Points.Clear();
             chartData.Series["S1_HbO2_RunAvg"].Points.Clear();
+            chartFFT.Series["S1_Hb_FFT"].Points.Clear();
+            chartFFT.Series["S1_HbO2_FFT"].Points.Clear();
+            chart_FFT_tracker.Series[0].Points.Clear();
+            chart_FFT_tracker.Series[1].Points.Clear();
 
             //Plot the latest data on the chart
             for (int i = 0; i < data.Length; i++)
@@ -237,6 +240,42 @@ namespace Fenrisulfr
             chartData.ChartAreas["ChartArea_Hb"].AxisX.Maximum = result.Milliseconds;
             chartData.ChartAreas["ChartArea_HbO2"].AxisX.Minimum = result.Milliseconds - _chartWidth;
             chartData.ChartAreas["ChartArea_HbO2"].AxisX.Maximum = result.Milliseconds;
+            
+            //Plot FFT           
+            int windowSize = 128; 
+            if (data.Length > windowSize)
+            {
+                //Calculate sample rate (by taking time between last 2 samples)
+                double sampleRate = 1f / ((data[data.Length - 1].Milliseconds - data[data.Length - 2].Milliseconds) / 1000f);
+
+                //Get window data
+                Double[] fftData_Hb = new double[windowSize];
+                Double[] fftData_HbO2 = new double[windowSize];
+
+                for (int i = 0; i < windowSize; i++)
+                {
+                    fftData_Hb[i] = Hb[Hb.Length - (windowSize - i)];
+                    fftData_HbO2[i] = HbO2[HbO2.Length - (windowSize - i)];
+                }
+
+                //Perform FFT                   
+                var FFTPoints_Hb = SignalUtil.GetSeriesFFT(fftData_Hb, sampleRate);
+                var FFTPoints_HbO2 = SignalUtil.GetSeriesFFT(fftData_HbO2, sampleRate);
+                                
+                //Plot FFT points
+                foreach (DataPoint p in FFTPoints_Hb)
+                {
+                    chartFFT.Series["S1_Hb_FFT"].Points.Add(p);
+                }
+                foreach (DataPoint p in FFTPoints_HbO2)
+                {
+                    chartFFT.Series["S1_HbO2_FFT"].Points.Add(p);
+                }
+                
+                //Plot on FFT tracker chart
+               // chart_FFT_tracker.Series[0].Points.Add(new DataPoint(data[data.Length - 1].Milliseconds, 10));
+               // chart_FFT_tracker.Series[1].Points.Add(new DataPoint(data[data.Length - 1].Milliseconds, 12));
+            }
         }
 
         private void chart_Click(object sender, EventArgs e)

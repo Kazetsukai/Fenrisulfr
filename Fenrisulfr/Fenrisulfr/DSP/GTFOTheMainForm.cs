@@ -27,41 +27,7 @@ namespace Fenrisulfr.DSP
             }
         }
 
-        private void GetSeriesFFT(List<DataPoint> discreteData, int windowSize, double sampleRate, out double[] xValues, out double[] yValues)
-        {
-            //Populate data
-            double[] dataIn = new double[windowSize];
-
-            for (int i = 0; i < discreteData.Count; i++)
-            {
-                dataIn[i] = discreteData[i].YValues[0];
-            }
-
-            //Calculate distance between frequencies on FFT plot
-            double freqBinWidth = sampleRate / windowSize;
-
-            //Calculate real and imag parts of frequency. Output of FFT for real data is mirror imaged, so there will be (2 * windowSize) elements in freqReal[] and freqImag[]
-            double[] freqReal, freqImag;
-            RealFourierTransformation rft = new RealFourierTransformation();
-            rft.TransformForward(dataIn, out freqReal, out freqImag);
-
-            xValues = new double[windowSize / 2];
-            yValues = new double[windowSize / 2];
-
-            //We only take first half of data (windowSize = half of freqReal[] size)
-            for (int i = 0; i < windowSize / 2; i++)
-            {
-                double magnitude = Math.Sqrt((freqReal[i] * freqReal[i]) + (freqImag[i] * freqImag[i]));
-                double freq = i * freqBinWidth / 2;
-
-                xValues[i] = freq;
-                yValues[i] = magnitude;
-
-                //Console.WriteLine(freqReal[i] + "\t" + freqImag[i]);
-            }
-        }
-
-
+       
         private void ButterworthFilter(List<DataPoint> fftSignal, double sampleFrequency, int order, double f0, double DCGain)
         {
             //Assumes input fftSignal has been halved to remove negative mirror image 
